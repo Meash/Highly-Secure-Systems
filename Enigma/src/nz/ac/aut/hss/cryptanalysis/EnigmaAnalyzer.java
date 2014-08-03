@@ -12,16 +12,12 @@ import java.util.regex.Pattern;
  * @created 30.07.2014
  */
 public class EnigmaAnalyzer implements CryptAnalyzer {
-	private final QgramCalculator qgramCalculator;
+	private final TextScore textScore;
 	private final Pattern whitespacePattern;
 
 	public EnigmaAnalyzer() throws IOException {
-		qgramCalculator = new QgramCalculator();
+		textScore = new BigramCalculator();
 		whitespacePattern = Pattern.compile("\\s");
-	}
-
-	public String findKey(String... ciphertexts) {
-		throw new UnsupportedOperationException("not yet implemented");
 	}
 
 	/**
@@ -43,13 +39,13 @@ public class EnigmaAnalyzer implements CryptAnalyzer {
 					final String plaintext = encrypter.decrypt(ciphertext, key);
 					if (!isEncodedProperly(ciphertext, plaintext))
 						continue;
-					double qgram = qgramCalculator.qgram(plaintext);
-					qgram = -qgram;
-					bestKey.updateIfBetter(key, qgram);
+					double score = textScore.valueOf(plaintext);
+					bestKey.updateIfBetter(key, score);
 				}
 			}
-			System.out.printf("%d/%d complete\n", ind1 + 1, 26);
+			System.out.printf("%2.0f%% ", (float) (ind1 + 1) / 26 * 100);
 		}
+		System.out.println();
 		return bestKey.getBestKey();
 	}
 

@@ -9,8 +9,10 @@ public class BestKeyStore {
 	private double value = Double.MIN_VALUE;
 
 	public void updateIfBetter(String key, double value) {
-		if (value > this.value)
+		if (value > this.value) {
 			this.key = key;
+			this.value = value;
+		}
 	}
 
 	public String getBestKey() {

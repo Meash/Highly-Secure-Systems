@@ -9,8 +9,8 @@ import java.io.IOException;
  * @see <a href="http://practicalcryptography.com/cryptanalysis/text-characterisation/quadgrams">Quadgram Statistics as
  * a Fitness Measure</a>
  */
-public class QgramCalculator extends FrequencyCalculator {
-	public QgramCalculator() throws IOException {
-		super("frequencies.txt", false, "\t");
+public class BigramCalculator extends FrequencyCalculator {
+	public BigramCalculator() throws IOException {
+		super("bigrams.csv", true, ",");
 	}
 }

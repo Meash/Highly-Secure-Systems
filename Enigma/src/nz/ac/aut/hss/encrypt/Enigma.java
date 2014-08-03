@@ -8,7 +8,7 @@ import java.util.Scanner;
  */
 public class Enigma implements Encrypter, Decrypter {
 	public static final char[] ALPHABET =
-			{' ', 'B', 'D', 'F', 'H', 'J', 'L', 'N', 'P', 'R', 'T', 'V', 'X', 'Z', 'A', 'C', 'E', 'G', 'I', 'K', 'M',
+			{'B', 'D', 'F', 'H', 'J', 'L', 'N', 'P', 'R', 'T', 'V', 'X', 'Z', 'A', 'C', 'E', 'G', 'I', 'K', 'M',
 					'O', 'Q', 'S', 'U', 'W', 'Y'};
 
 	//Number of routers
@@ -18,13 +18,13 @@ public class Enigma implements Encrypter, Decrypter {
 
 	// Values for three rotors
 	private char[] innerRotor =
-			{' ', 'G', 'N', 'U', 'A', 'H', 'O', 'V', 'B', 'I', 'P', 'W', 'C', 'J', 'Q', 'X', 'D', 'K', 'R', 'Y', 'E',
+			{'G', 'N', 'U', 'A', 'H', 'O', 'V', 'B', 'I', 'P', 'W', 'C', 'J', 'Q', 'X', 'D', 'K', 'R', 'Y', 'E',
 					'L', 'S', 'Z', 'F', 'M', 'T'};
 	private char[] middleRotor =
-			{' ', 'E', 'J', 'O', 'T', 'Y', 'C', 'H', 'M', 'R', 'W', 'A', 'F', 'K', 'P', 'U', 'Z', 'D', 'I', 'N', 'S',
+			{'E', 'J', 'O', 'T', 'Y', 'C', 'H', 'M', 'R', 'W', 'A', 'F', 'K', 'P', 'U', 'Z', 'D', 'I', 'N', 'S',
 					'X', 'B', 'G', 'L', 'Q', 'V'};
 	private char[] outerRotor =
-			{' ', 'B', 'D', 'F', 'H', 'J', 'L', 'N', 'P', 'R', 'T', 'V', 'X', 'Z', 'A', 'C', 'E', 'G', 'I', 'K', 'M',
+			{'B', 'D', 'F', 'H', 'J', 'L', 'N', 'P', 'R', 'T', 'V', 'X', 'Z', 'A', 'C', 'E', 'G', 'I', 'K', 'M',
 					'O', 'Q', 'S', 'U', 'W', 'Y'};
 
 	// Create index arrays corresponding to each of the above, so that a letter can be used directly
@@ -180,14 +180,14 @@ public class Enigma implements Encrypter, Decrypter {
 			innerRotorCharIndex = innerRotorIndex[plainTextCharValue];
 			// find the corresponding character at that position on the outer rotor. Add an extra
 			// increment to reflect the inner rotor rotation as we go
-			outerRotorCharacter = outerRotor[(innerRotorCharIndex + (i % 27)) % 27];
+			outerRotorCharacter = outerRotor[(innerRotorCharIndex + (i % ALPHABET.length)) % ALPHABET.length];
 			// Find that character on the middle rotor
 			middleRotorCharIndex = middleRotorIndex[(int) outerRotorCharacter];
 			// Find the character on the outer rotor that matches that middle rotor position.
 			// Each time the inner rotor makes a complete revolution, the middle rotor advances once.  Each of
 			// these middle rotor rotations means the middle rotor then corresponds to one character *after* it
 			// would otherwise on the outer rotor, so add this amount.
-			outerRotorCharacter = outerRotor[(middleRotorCharIndex + (i / 27) % 27) % 27];
+			outerRotorCharacter = outerRotor[(middleRotorCharIndex + (i / ALPHABET.length) % ALPHABET.length) % ALPHABET.length];
 
 			encodedText[i] = outerRotorCharacter;
 		}
@@ -213,17 +213,17 @@ public class Enigma implements Encrypter, Decrypter {
 
 			// Store the middle rotor character in that same index position. Subtract from the index
 			// the number of times the middle rotor has been rotated. Since we can't subtract and "wrap
-			// around" in an array, instead we do the equivalent by adding (27 - the_amount_to_subtract)
-			numberOfRotorShifts = (i / 27) % 27;    // amount to be subtracted
-			incrementIndex = 27 - numberOfRotorShifts;    // turn subtraction into addition
-			middleRotorCharacter = middleRotor[(outerRotorCharIndex + incrementIndex) % 27];
+			// around" in an array, instead we do the equivalent by adding (ALPHABET.length (26) - the_amount_to_subtract)
+			numberOfRotorShifts = (i / ALPHABET.length) % ALPHABET.length;    // amount to be subtracted
+			incrementIndex = ALPHABET.length - numberOfRotorShifts;    // turn subtraction into addition
+			middleRotorCharacter = middleRotor[(outerRotorCharIndex + incrementIndex) % ALPHABET.length];
 			// Find that middle rotor character on the outer rotor
 			outerRotorCharIndex = outerRotorIndex[middleRotorCharacter];
 			// Find the new inner rotor character corresponding to that outer rotor character.
 			// Subtract from the inner rotor index the number of times the inner rotor has been rotated.
-			numberOfRotorShifts = i % 27;
-			incrementIndex = 27 - numberOfRotorShifts;
-			innerRotorCharacter = innerRotor[(outerRotorCharIndex + incrementIndex) % 27];
+			numberOfRotorShifts = i % ALPHABET.length;
+			incrementIndex = ALPHABET.length - numberOfRotorShifts;
+			innerRotorCharacter = innerRotor[(outerRotorCharIndex + incrementIndex) % ALPHABET.length];
 
 			cipherText[i] = innerRotorCharacter;
 		}
@@ -241,7 +241,7 @@ public class Enigma implements Encrypter, Decrypter {
 	public String decrypt(final String ciphertext, final String key) {
 		validateKey(key);
 		rotateRotors(key.charAt(0), key.charAt(1), key.charAt(2));
-		return new String(decodeText(ciphertext.toCharArray()));
+		return new String(decodeText(ciphertext.toCharArray())).toLowerCase();
 	}
 
 	private void validateKey(final String key) {
