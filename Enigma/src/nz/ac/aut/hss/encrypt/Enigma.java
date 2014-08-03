@@ -64,9 +64,9 @@ public class Enigma implements Encrypter, Decrypter {
 
 		if (userInput.length() == 0) {
 			System.out.println("Rotor set to defualt starting position.");
-			innerRotorStartingLetter = ' ';
-			middleRotorStartingLetter = ' ';
-			outerRotorStartingLetter = ' ';
+			innerRotorStartingLetter = innerRotor[0];
+			middleRotorStartingLetter = middleRotor[0];
+			outerRotorStartingLetter = outerRotor[0];
 		} else {
 			userInput = userInput.toUpperCase();
 			// extract characters for starting rotor values
