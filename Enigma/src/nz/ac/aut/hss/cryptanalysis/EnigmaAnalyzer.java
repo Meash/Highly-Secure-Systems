@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 public class EnigmaAnalyzer implements CryptAnalyzer {
 	private final TextScore textScore;
 	private final Pattern whitespacePattern;
+	private static final int ALPHABET_SIZE = Enigma.ALPHABET.length;
 
 	public EnigmaAnalyzer() throws IOException {
 		textScore = new BigramCalculator();
@@ -31,11 +32,12 @@ public class EnigmaAnalyzer implements CryptAnalyzer {
 			throw new IllegalArgumentException("Ciphertext is not all upper-case");
 		Enigma encrypter = new Enigma();
 		final BestKeyStore bestKey = new BestKeyStore();
-		for (int ind1 = 0; ind1 < 26; ind1++) {
-			for (int ind2 = 0; ind2 < 26; ind2++) {
-				for (int ind3 = 0; ind3 < 26; ind3++) {
-					final String key = String.valueOf(Enigma.ALPHABET[ind1]) + Enigma.ALPHABET[ind2] +
-							Enigma.ALPHABET[ind3];
+		for (int ind1 = 0; ind1 < ALPHABET_SIZE; ind1++) {
+			for (int ind2 = 0; ind2 < ALPHABET_SIZE; ind2++) {
+				for (int ind3 = 0; ind3 < ALPHABET_SIZE; ind3++) {
+					final String key = String.valueOf(Enigma.ALPHABET[ind1])
+							+ Enigma.ALPHABET[ind2]
+							+ Enigma.ALPHABET[ind3];
 					final String plaintext = encrypter.decrypt(ciphertext, key);
 					if (!isEncodedProperly(ciphertext, plaintext))
 						continue;
@@ -43,7 +45,7 @@ public class EnigmaAnalyzer implements CryptAnalyzer {
 					bestKey.updateIfBetter(key, score);
 				}
 			}
-			System.out.printf("%2.0f%% ", (float) (ind1 + 1) / 26 * 100);
+			System.out.printf("%2.0f%% ", (float) (ind1 + 1) / ALPHABET_SIZE * 100);
 		}
 		System.out.println();
 		return bestKey.getBestKey();

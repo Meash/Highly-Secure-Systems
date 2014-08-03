@@ -8,8 +8,8 @@ import java.util.Scanner;
  */
 public class Enigma implements Encrypter, Decrypter {
 	public static final char[] ALPHABET =
-			{'B', 'D', 'F', 'H', 'J', 'L', 'N', 'P', 'R', 'T', 'V', 'X', 'Z', 'A', 'C', 'E', 'G', 'I', 'K', 'M',
-					'O', 'Q', 'S', 'U', 'W', 'Y'};
+			{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
+					'V', 'W', 'X', 'Y', 'Z'};
 
 	//Number of routers
 	private final int NUMBER_OF_ROTORS = 3; // TODO either implement it or leave it out, so far this variable is useless
@@ -17,15 +17,9 @@ public class Enigma implements Encrypter, Decrypter {
 	private static Scanner keyboard = new Scanner(System.in);
 
 	// Values for three rotors
-	private char[] innerRotor =
-			{'G', 'N', 'U', 'A', 'H', 'O', 'V', 'B', 'I', 'P', 'W', 'C', 'J', 'Q', 'X', 'D', 'K', 'R', 'Y', 'E',
-					'L', 'S', 'Z', 'F', 'M', 'T'};
-	private char[] middleRotor =
-			{'E', 'J', 'O', 'T', 'Y', 'C', 'H', 'M', 'R', 'W', 'A', 'F', 'K', 'P', 'U', 'Z', 'D', 'I', 'N', 'S',
-					'X', 'B', 'G', 'L', 'Q', 'V'};
-	private char[] outerRotor =
-			{'B', 'D', 'F', 'H', 'J', 'L', 'N', 'P', 'R', 'T', 'V', 'X', 'Z', 'A', 'C', 'E', 'G', 'I', 'K', 'M',
-					'O', 'Q', 'S', 'U', 'W', 'Y'};
+	private char[] innerRotor = ALPHABET;
+	private char[] middleRotor = ALPHABET;
+	private char[] outerRotor = ALPHABET;
 
 	// Create index arrays corresponding to each of the above, so that a letter can be used directly
 	// as an index and doesn't require searching.  In other words, rather than having to search within
@@ -36,11 +30,6 @@ public class Enigma implements Encrypter, Decrypter {
 	private int[] innerRotorIndex = new int[128];
 	private int[] middleRotorIndex = new int[128];
 	private int[] outerRotorIndex = new int[128];
-
-	// Starting rotor position is chosen by the user, and modifies the starting rotor values
-	private char innerRotorStartingLetter = ' ';
-	private char middleRotorStartingLetter = ' ';
-	private char outerRotorStartingLetter = ' ';
 
 
 	public static void main(String[] args) throws IOException {
@@ -62,6 +51,9 @@ public class Enigma implements Encrypter, Decrypter {
 				.print("Enter the inner, mid, and outer rotor starting letters (e.g. ABC) or press enter for default: ");
 		String userInput = keyboard.nextLine();
 
+		char innerRotorStartingLetter;
+		char outerRotorStartingLetter;
+		char middleRotorStartingLetter;
 		if (userInput.length() == 0) {
 			System.out.println("Rotor set to defualt starting position.");
 			innerRotorStartingLetter = innerRotor[0];
@@ -92,9 +84,6 @@ public class Enigma implements Encrypter, Decrypter {
 
 	/**
 	 * Rotate rotors based on starting letters.  Then reinitialize the arrays of rotor index values
-	 * @param innerRotorStartingLetter
-	 * @param middleRotorStartingLetter
-	 * @param outerRotorStartingLetter
 	 */
 	private void rotateRotors(
 			char innerRotorStartingLetter,
@@ -112,8 +101,6 @@ public class Enigma implements Encrypter, Decrypter {
 
 	/**
 	 * rotate the rotor letters to reflect the user's choice of rotor starting position.
-	 * @param theLetter
-	 * @param theRotor
 	 */
 	private void rotateRotorToStartingCharacter(char theLetter, char[] theRotor) {
 		//Make copy
@@ -122,7 +109,6 @@ public class Enigma implements Encrypter, Decrypter {
 
 		int letterPosition = -1;
 		// find the letter in the rotor
-		boolean found = false;
 		for (int i = 0; i < theRotorCopy.length; i++) {
 			if (theRotor[i] == theLetter) {
 				letterPosition = i;
@@ -142,8 +128,6 @@ public class Enigma implements Encrypter, Decrypter {
 	 * Create index arrays corresponding to each of the above, so that a letter can be used directly
 	 * as an index and doesn't require searching.
 	 * E.g. 'A' = 65
-	 * @param rotorIndex
-	 * @param theRotorCharacters
 	 */
 	private void setRotorIndexValues(int[] rotorIndex, char[] theRotorCharacters) {
 		// set default values to -1 for index values incase of invalid character.
@@ -187,7 +171,8 @@ public class Enigma implements Encrypter, Decrypter {
 			// Each time the inner rotor makes a complete revolution, the middle rotor advances once.  Each of
 			// these middle rotor rotations means the middle rotor then corresponds to one character *after* it
 			// would otherwise on the outer rotor, so add this amount.
-			outerRotorCharacter = outerRotor[(middleRotorCharIndex + (i / ALPHABET.length) % ALPHABET.length) % ALPHABET.length];
+			outerRotorCharacter =
+					outerRotor[(middleRotorCharIndex + (i / ALPHABET.length) % ALPHABET.length) % ALPHABET.length];
 
 			encodedText[i] = outerRotorCharacter;
 		}
@@ -197,7 +182,6 @@ public class Enigma implements Encrypter, Decrypter {
 
 	public char[] decodeText(char[] cipherText) {
 		int cipherTextCharValue;
-		int innerRotorCharIndex;
 		char innerRotorCharacter;
 		char middleRotorCharacter;
 		int outerRotorCharIndex;
