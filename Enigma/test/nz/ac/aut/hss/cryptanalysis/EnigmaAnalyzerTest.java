@@ -23,28 +23,25 @@ public class EnigmaAnalyzerTest {
 
 	@Test
 	public void shortCipherText() throws Exception {
-		final String plaintext =
-				"intelligencepointstoattackontheeastwallofthecastleatdawn";
-		final Enigma enigma = new Enigma();
-		String ciphertext = enigma.encrypt(plaintext, "MAS");
-		System.out.printf("%7s: %s\n", "Cipher", ciphertext);
-		String key = analyzer.findKey(ciphertext);
-		System.out.printf("%7s: %s\n", "Key", key);
-		String analyzedPlaintext = enigma.decrypt(ciphertext, key);
-		System.out.printf("%7s: %s\n", "Plain", analyzedPlaintext);
-		assertEquals(plaintext, analyzedPlaintext);
+		final String plaintext = "intelligencepointstoattackontheeastwallofthecastleatdawn";
+		test(plaintext, "MAS");
 	}
 
 	@Test
 	public void greeting() throws Exception {
 		final String plaintext = "togeneraloberzalekxnothingtoreport";
+		test(plaintext, "MAS");
+	}
+
+	private void test(final String plaintext, final String key) {
 		final Enigma enigma = new Enigma();
-		String ciphertext = enigma.encrypt(plaintext, "MAS");
-		System.out.printf("%7s: %s\n", "Cipher", ciphertext);
-		String key = analyzer.findKey(ciphertext);
-		System.out.printf("%7s: %s\n", "Key", key);
-		String analyzedPlaintext = enigma.decrypt(ciphertext, key);
-		System.out.printf("%7s: %s\n", "Plain", analyzedPlaintext);
+		final String ciphertext = enigma.encrypt(plaintext, key);
+		System.out.printf("%15s: %s\n", "Cipher", ciphertext);
+		final String analyzedKey = analyzer.findKey(ciphertext);
+		System.out.printf("%15s: %s\n", "Analyzed Key", analyzedKey);
+		assertEquals(key, analyzedKey);
+		final String analyzedPlaintext = enigma.decrypt(ciphertext, analyzedKey);
+		System.out.printf("%15s: %s\n", "Analyzed Plain", analyzedPlaintext);
 		assertEquals(plaintext, analyzedPlaintext);
 	}
 }

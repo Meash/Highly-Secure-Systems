@@ -30,7 +30,7 @@ public class EnigmaAnalyzer implements CryptAnalyzer {
 	public String findKey(String ciphertext) {
 		if (!StringUtils.isAllUpperCase(ciphertext))
 			throw new IllegalArgumentException("Ciphertext is not all upper-case");
-		Enigma encrypter = new Enigma();
+		final Enigma encrypter = new Enigma();
 		final BestKeyStore bestKey = new BestKeyStore();
 		for (int ind1 = 0; ind1 < ALPHABET_SIZE; ind1++) {
 			for (int ind2 = 0; ind2 < ALPHABET_SIZE; ind2++) {
@@ -41,7 +41,7 @@ public class EnigmaAnalyzer implements CryptAnalyzer {
 					final String plaintext = encrypter.decrypt(ciphertext, key);
 					if (!isEncodedProperly(ciphertext, plaintext))
 						continue;
-					double score = textScore.valueOf(plaintext);
+					final double score = textScore.valueOf(plaintext);
 					bestKey.updateIfBetter(key, score);
 				}
 			}
