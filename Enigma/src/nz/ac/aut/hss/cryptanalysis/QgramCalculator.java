@@ -1,78 +1,95 @@
 package nz.ac.aut.hss.cryptanalysis;
 
-import org.apache.commons.lang3.ArrayUtils;
+import nz.ac.aut.hss.util.FileIO;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
+ * Calculates quadgram statistics of text in the english language.
  * @author Martin Schrimpf
  * @created 03.08.2014
+ * @see <a href="http://practicalcryptography.com/cryptanalysis/text-characterisation/quadgrams">Quadgram Statistics as
+ * a Fitness Measure</a>
  */
 public class QgramCalculator {
-	private static final String VALUE_DELIMITER = ",";
-	// qgram obtained from http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma/
-	private final float qgram[];
+	private static final String VALUE_DELIMITER = "\t";
+	private static final int MIN_LENGTH = 3;
+
+	private final Map<String, Float> frequencies;
+	private final Pattern pattern;
 
 	public QgramCalculator() throws IOException {
-		final String file = "qgram.txt";
+		final String file = "frequencies.txt";
 		final InputStream resource = getClass().getClassLoader().getResourceAsStream(file);
-		if(resource == null)
+		if (resource == null)
 			throw new IllegalStateException(file + " does not exist");
-		qgram = loadQgram(resource);
+		this.frequencies = loadFrequencies(resource);
+		this.pattern = buildPattern(this.frequencies);
 	}
 
-	private float[] loadQgram(final InputStream inputStream) throws IOException {
-		StringTokenizer tokenizer = new StringTokenizer(read(inputStream), VALUE_DELIMITER);
-		List<Float> result = new ArrayList<Float>();
+	public double valueOf(String text) {
+		double sum = 0;
+		Matcher matcher = pattern.matcher(text);
+		while (matcher.find()) {
+			String match = matcher.group();
+			float value = frequencies.get(match);
+			sum += value;
+		}
+		return sum;
+	}
+
+	private Map<String, Float> loadFrequencies(final InputStream inputStream) throws IOException {
+		/* first run: read file contents into map */
+		final String fileContents = FileIO.read(inputStream);
+		final StringTokenizer tokenizer = new StringTokenizer(fileContents, FileIO.LINE_SEPARATOR);
+		final Map<String, Float> map = new HashMap<String, Float>();
+		BigInteger totalCount = BigInteger.valueOf(0);
 		while (tokenizer.hasMoreTokens()) {
-			String next = tokenizer.nextToken();
-			float value = Float.valueOf(next);
-			result.add(value);
+			final String next = tokenizer.nextToken();
+			final String[] parts = next.split(VALUE_DELIMITER);
+			final String word = parts[0];
+			if(word.length() < MIN_LENGTH)
+				continue;
+			final long value = Long.valueOf(parts[1]);
+			map.put(word, (float) value);
+
+			totalCount = totalCount.add(BigInteger.valueOf(value));
 		}
-		final Float[] resultArray = result.toArray(new Float[result.size()]);
-		return ArrayUtils.toPrimitive(resultArray);
+
+		/* second run: adjust values */
+		Iterator<Map.Entry<String, Float>> iterator = map.entrySet().iterator();
+		while(iterator.hasNext()) {
+			Map.Entry<String, Float> entry = iterator.next();
+			final float value = BigInteger.valueOf((long) ((float) entry.getValue())).divide(totalCount).floatValue();
+			if(value == 0)
+				iterator.remove();
+			else
+				map.put(entry.getKey(), value);
+		}
+		return map;
 	}
 
 
-	public double qgram(String text) {
-		final char[] charText = text.toCharArray();
-		int temp[] = new int[4];
-		double score = 0;
-		for (int i = 0; i < charText.length - 3; i++) {
-			temp[0] = charText[i] - 'A';
-			temp[1] = charText[i + 1] - 'A';
-			temp[2] = charText[i + 2] - 'A';
-			temp[3] = charText[i + 3] - 'A';
-			final int index = 17576 * temp[0] + 676 * temp[1] + 26 * temp[2] + temp[3];
-			score += qgram[index];
+	private Pattern buildPattern(final Map<String, Float> frequencies) {
+		String regex = "";
+		boolean first = true;
+		for (Map.Entry<String, Float> entry : frequencies.entrySet()) {
+			if (first) {
+				first = false;
+			} else {
+				regex += "|";
+			}
+			regex += entry.getKey().toUpperCase(); // no need to quote, should be alphanumeric only
 		}
-		return score;
-	}
-
-	/**
-	 * Efficiently reads the content of a File.
-	 * @param inputStream the input
-	 * @return the String-content of the File
-	 * @throws IOException           when the file could not be read
-	 * @throws FileNotFoundException when the file does not exist
-	 */
-	public static String read(InputStream inputStream)
-			throws IllegalArgumentException, IOException {
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new InputStreamReader(inputStream));
-			String line;
-			StringBuilder result = new StringBuilder();
-			while((line = reader.readLine()) != null)
-				result.append(line);
-			return result.toString();
-		} finally {
-			if (reader != null)
-				reader.close();
-		}
+		return Pattern.compile(regex);
 	}
 
 }
