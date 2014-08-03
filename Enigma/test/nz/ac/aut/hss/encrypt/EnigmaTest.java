@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Martin Schrimpf
@@ -25,22 +26,41 @@ public class EnigmaTest {
 		test(plaintext);
 	}
 
+	/**
+	 * Compares all possible keys to make sure no two create the same ciphertext and can thus decrypt another key's
+	 * ciphertext.
+	 */
 	@Test
 	public void sameKeys() {
 		final String plaintext = "intelligencepointstoattackontheeastwallofthecastleatdawn";
-		final String[] keys = {"MAS", "AZD"};
+		// set up keys
+		final String[] keys = new String[Enigma.ALPHABET.length * Enigma.ALPHABET.length * Enigma.ALPHABET.length];
+		for (int ind1 = 0; ind1 < ALPHABET_SIZE; ind1++) {
+			for (int ind2 = 0; ind2 < ALPHABET_SIZE; ind2++) {
+				for (int ind3 = 0; ind3 < ALPHABET_SIZE; ind3++) {
+					keys[26 * 26 * ind1 + 26 * ind2 + ind3] = String.valueOf(Enigma.ALPHABET[ind1])
+							+ Enigma.ALPHABET[ind2]
+							+ Enigma.ALPHABET[ind3];
+				}
+			}
+		}
+		for (final String key : keys) {
+			assertNotNull(key);
+		}
 		// compare ciphers
 		final String[] ciphers = new String[keys.length];
 		for (int i = 0; i < keys.length; i++) {
 			ciphers[i] = enigma.encrypt(plaintext, keys[i]);
 			for (int j = 0; j < i; j++) {
-				assertNotEquals(ciphers[i], ciphers[j]);
+				assertNotEquals("Keys " + keys[i] + " and " + keys[j] + " result in the same cipher text", ciphers[i],
+						ciphers[j]);
 			}
 		}
 		// cross-over
 		for (int i = 0; i < ciphers.length; i++) {
 			for (int k = 0; k < i; k++) {
-				assertNotEquals(plaintext, enigma.decrypt(ciphers[i], keys[k]));
+				assertNotEquals("Key " + keys[k] + " can decrypt the plaintext of " + keys[i], plaintext,
+						enigma.decrypt(ciphers[i], keys[k]));
 			}
 		}
 	}
