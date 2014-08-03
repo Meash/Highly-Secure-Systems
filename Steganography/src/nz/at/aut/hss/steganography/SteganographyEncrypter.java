@@ -1,13 +1,12 @@
 package nz.at.aut.hss.steganography;
 
-import java.awt.Color;
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import javax.imageio.ImageIO;
 
 public class SteganographyEncrypter {
 	public void encrypt(String message, File imageFile, File destFile)
@@ -23,7 +22,7 @@ public class SteganographyEncrypter {
 
 	private BufferedImage encode(String message, BufferedImage image) {
 		byte[] bytes = message.getBytes();
-		Queue<Integer> bitsQueue = new ConcurrentLinkedQueue<>();
+		Queue<Integer> bitsQueue = new ConcurrentLinkedQueue<Integer>();
 		bitsQueue = fillQueue(bitsQueue, bytes);
 		for (int x = 0; x < image.getWidth() && !bitsQueue.isEmpty(); x++) {
 			for (int y = 0; y < image.getHeight() && !bitsQueue.isEmpty(); y++) {

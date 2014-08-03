@@ -20,7 +20,7 @@ public class SteganographyDecrypter {
 			throws UnsupportedEncodingException {
 		int bitCounter = 0;
 		int currentByte = 0;
-		List<Byte> result = new ArrayList<>();
+		List<Byte> result = new ArrayList<Byte>();
 		for (int x = 0; x < image.getWidth(); x++) {
 			for (int y = 0; y < image.getHeight(); y++) {
 				int rgb = image.getRGB(x, y);
