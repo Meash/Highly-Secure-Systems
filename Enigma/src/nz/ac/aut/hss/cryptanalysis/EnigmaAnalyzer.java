@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
  * @created 30.07.2014
  */
 public class EnigmaAnalyzer implements CryptAnalyzer {
+	private static final boolean DEBUG = false;
+
 	private final TextScore textScore;
 	private final Pattern whitespacePattern;
 	private static final int ALPHABET_SIZE = Enigma.ALPHABET.length;
@@ -45,10 +47,16 @@ public class EnigmaAnalyzer implements CryptAnalyzer {
 					bestKey.updateIfBetter(key, score);
 				}
 			}
-			System.out.printf("%2.0f%% ", (float) (ind1 + 1) / ALPHABET_SIZE * 100);
+			debug("%2.0f%% ", (float) (ind1 + 1) / ALPHABET_SIZE * 100);
 		}
-		System.out.println();
+		debug("\n");
 		return bestKey.getBestKey();
+	}
+
+	private void debug(final String format, final Object... args) {
+		if (DEBUG) {
+			System.out.printf(format, args);
+		}
 	}
 
 	private boolean isEncodedProperly(final String ciphertext, final String plaintext) {
