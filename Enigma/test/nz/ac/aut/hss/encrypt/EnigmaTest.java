@@ -3,9 +3,7 @@ package nz.ac.aut.hss.encrypt;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * @author Martin Schrimpf
@@ -38,9 +36,10 @@ public class EnigmaTest {
 		for (int ind1 = 0; ind1 < ALPHABET_SIZE; ind1++) {
 			for (int ind2 = 0; ind2 < ALPHABET_SIZE; ind2++) {
 				for (int ind3 = 0; ind3 < ALPHABET_SIZE; ind3++) {
-					keys[26 * 26 * ind1 + 26 * ind2 + ind3] = String.valueOf(Enigma.ALPHABET[ind1])
-							+ Enigma.ALPHABET[ind2]
-							+ Enigma.ALPHABET[ind3];
+					keys[ALPHABET_SIZE * ALPHABET_SIZE * ind1 + ALPHABET_SIZE * ind2 + ind3] =
+							String.valueOf(Enigma.ALPHABET[ind1])
+									+ Enigma.ALPHABET[ind2]
+									+ Enigma.ALPHABET[ind3];
 				}
 			}
 		}

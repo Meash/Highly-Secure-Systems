@@ -12,13 +12,13 @@ import java.util.regex.Pattern;
  * @created 30.07.2014
  */
 public class EnigmaAnalyzer implements CryptAnalyzer {
-	private static final boolean DEBUG = false;
-
 	private final TextScore textScore;
 	private final Pattern whitespacePattern;
 	private static final int ALPHABET_SIZE = Enigma.ALPHABET.length;
+	private final int rotors;
 
-	public EnigmaAnalyzer() throws IOException {
+	public EnigmaAnalyzer(final int rotors) throws IOException {
+		this.rotors = rotors;
 		textScore = new BigramCalculator();
 		whitespacePattern = Pattern.compile("\\s");
 	}
@@ -34,29 +34,27 @@ public class EnigmaAnalyzer implements CryptAnalyzer {
 			throw new IllegalArgumentException("Ciphertext is not all upper-case");
 		final Enigma encrypter = new Enigma();
 		final BestKeyStore bestKey = new BestKeyStore();
-		for (int ind1 = 0; ind1 < ALPHABET_SIZE; ind1++) {
-			for (int ind2 = 0; ind2 < ALPHABET_SIZE; ind2++) {
-				for (int ind3 = 0; ind3 < ALPHABET_SIZE; ind3++) {
-					final String key = String.valueOf(Enigma.ALPHABET[ind1])
-							+ Enigma.ALPHABET[ind2]
-							+ Enigma.ALPHABET[ind3];
-					final String plaintext = encrypter.decrypt(ciphertext, key);
-					if (!isEncodedProperly(ciphertext, plaintext))
-						continue;
-					final double score = textScore.valueOf(plaintext);
-					bestKey.updateIfBetter(key, score);
-				}
+		// Search all possible keys by utilizing maths instead of nested for loops
+		// (this also allows a variable amount of rotors).
+		// The total amount of possible keys is ALPHABET_SIZE^rotors, our max value.
+		// Each integer value from zero to this max value represents one unique key
+		// that can be determined by consecutively performing modulo operations on the integer value
+		// and "cutting off" the just used bits with a division.
+		final int possibleKeys = (int) Math.pow(ALPHABET_SIZE, rotors);
+		for (int num = 0; num < possibleKeys; num++) {
+			String key = "";
+			for (int k = 0; k < rotors; k++) {
+				final int index = (int) (num / Math.pow(ALPHABET_SIZE, k)) % ALPHABET_SIZE;
+				key = String.valueOf(Enigma.ALPHABET[index]) + key; // make order AAA, AAB... instead of AAA, BAA...
 			}
-			debug("%2.0f%% ", (float) (ind1 + 1) / ALPHABET_SIZE * 100);
+			final String plaintext = encrypter.decrypt(ciphertext, key);
+			// save some score computing time by validating the plaintext
+			if (!isEncodedProperly(ciphertext, plaintext))
+				continue;
+			final double score = textScore.valueOf(plaintext);
+			bestKey.updateIfBetter(key, score);
 		}
-		debug("\n");
 		return bestKey.getBestKey();
-	}
-
-	private void debug(final String format, final Object... args) {
-		if (DEBUG) {
-			System.out.printf(format, args);
-		}
 	}
 
 	private boolean isEncodedProperly(final String ciphertext, final String plaintext) {

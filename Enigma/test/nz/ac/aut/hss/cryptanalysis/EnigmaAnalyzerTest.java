@@ -17,13 +17,34 @@ public class EnigmaAnalyzerTest {
 	public static void setUpBeforeClass() throws Exception {
 		System.out.print("Setting up...");
 		System.out.flush();
-		analyzer = new EnigmaAnalyzer();
+		analyzer = new EnigmaAnalyzer(3);
 		System.out.println(" complete.");
 	}
 
 	@Test
 	public void shortCipherText() throws Exception {
 		final String plaintext = "intelligencepointstoattackontheeastwallofthecastleatdawn";
+		test(plaintext, "MAS");
+	}
+
+	@Test
+	public void longCipherText() throws Exception {
+		final String plaintext =
+				"Loremipsumdolorsitametconsetetursadipscingelitrseddiamnonumyeirmodtemporinviduntutlaboreet" +
+						"doloremagnaaliquyameratseddiamvoluptuaAtveroeosetaccusametjustoduodoloresetearebum" +
+						"StetclitakasdgubergrennoseatakimatasanctusestLoremipsumdolorsitametLoremipsumdolorsitamet" +
+						"consetetursadipscingelitrseddiamnonumyeirmodtemporinviduntutlaboreetdoloremagnaali" +
+						"quyameratseddiamvoluptuaAtveroeosetaccusametjustoduodoloresetearebumStetclitakasd" +
+						"gubergrennoseatakimatasanctusestLoremipsumdolorsitametLoremipsumdolorsitametconsetetursa" +
+						"dipscingelitrseddiamnonumyeirmodtemporinviduntutlaboreetdoloremagnaaliquyameratseddi" +
+						"amvoluptuaAtveroeosetaccusametjustoduodoloresetearebumStetclitakasdgubergrennoseatakima" +
+						"tasanctusestLoremipsumdolorsitametDuisautemveleumiriuredolorinhendreritinvulputate" +
+						"velitessemolestieconsequatvelillumdoloreeufeugiatnullafacilisisatveroerosetaccumsane" +
+						"tiustoodiodignissimquiblanditpraesentluptatumzzrildelenitaugueduisdoloretefeugait" +
+						"nullafacilisiLoremipsumdolorsitametconsectetueradipiscingelitseddiamnonummynibheuismod" +
+						"tinciduntutlaoreetdoloremagnaaliquameratvolutpatUtwisienimadminimveniamquisnostru" +
+						"dexercitationullamcorpersuscipitlobortisnislutaliquipexeacommodoconsequatDuisautem" +
+						"veleumiriuredolorinhendreritinvulputatevelitesse";
 		test(plaintext, "MAS");
 	}
 
@@ -39,9 +60,9 @@ public class EnigmaAnalyzerTest {
 		System.out.printf("%15s: %s\n", "Cipher", ciphertext);
 		final String analyzedKey = analyzer.findKey(ciphertext);
 		System.out.printf("%15s: %s\n", "Analyzed Key", analyzedKey);
-		assertEquals(key, analyzedKey);
 		final String analyzedPlaintext = enigma.decrypt(ciphertext, analyzedKey);
 		System.out.printf("%15s: %s\n", "Analyzed Plain", analyzedPlaintext);
 		assertEquals(plaintext, analyzedPlaintext);
+		assertEquals(key, analyzedKey); // TODO: move below print key
 	}
 }

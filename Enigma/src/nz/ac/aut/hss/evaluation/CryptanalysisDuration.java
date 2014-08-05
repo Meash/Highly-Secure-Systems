@@ -22,9 +22,9 @@ public class CryptanalysisDuration {
 		final String plaintext = "intelligencepointstoattackontheeastwallofthecastleatdawn";
 		final String key = "MAS";
 		final String ciphertext = new Enigma().encrypt(plaintext, key);
-		final EnigmaAnalyzer analyzer = new EnigmaAnalyzer();
 		for (int rotors = rotorsMin; rotors <= rotorsMax; rotors += rotorsStep) {
 			System.out.print(rotors + ",");
+			final EnigmaAnalyzer analyzer = new EnigmaAnalyzer(rotors);
 			final Stats stats = new Stats();
 			for (int l = 0; l < loops; l++) {
 				stats.startMeasurement();

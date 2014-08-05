@@ -92,7 +92,7 @@ public class Enigma implements Encrypter, Decrypter {
 	}
 
 	/**
-	 * Encodes the given plaintext.
+	 * Encodes the given plaintext. Requires the rotors to be set according to the key beforehand.
 	 * Lower- and upper-case are not distinguished, all characters are converted to upper case
 	 * @param plaintext the plaintext to encode
 	 * @return the ciphertext
@@ -130,6 +130,11 @@ public class Enigma implements Encrypter, Decrypter {
 	}
 
 
+	/**
+	 * Requires the rotors to be set according to the key beforehand.
+	 * @param cipherText the cipher text to decode
+	 * @return the plaintext
+	 */
 	private char[] decodeText(char[] cipherText) {
 		int cipherTextCharValue;
 		char innerRotorCharacter;
