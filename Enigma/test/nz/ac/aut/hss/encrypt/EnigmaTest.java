@@ -1,5 +1,6 @@
 package nz.ac.aut.hss.encrypt;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -15,7 +16,16 @@ public class EnigmaTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
-		enigma = new Enigma();
+		enigma = new Enigma(3);
+	}
+
+	@Test
+	public void encryptDecrypt() {
+		final String plaintext = "intelligencepointstoattackontheeastwallofthecastleatdawn";
+		final String key = "MAS";
+		final String ciphertext = enigma.encrypt(plaintext, key);
+		assertTrue(StringUtils.isAlpha(ciphertext));
+		assertEquals(plaintext, enigma.decrypt(ciphertext, key));
 	}
 
 	@Test

@@ -13,6 +13,21 @@ public class Enigma implements Encrypter, Decrypter {
 
 	public Enigma(final int rotors) {
 		this.rotorPositions = new int[rotors];
+//		// scramble rotors
+//		this.rotors = new char[rotors][];
+//		for (int r = 0; r < rotors; r++) {
+//			this.rotors[r] = new char[ALPHABET.length];
+//			final int everyNth = r + 1;
+//			int start = everyNth;
+//			int n = everyNth;
+//			for (int i = 0; i < this.rotors[r].length; i++) {
+//				if(n > ALPHABET.length) {
+//					n = start--;
+//				}
+//				this.rotors[r][i] = ALPHABET[n];
+//				n += everyNth;
+//			}
+//		}
 	}
 
 	/**
@@ -51,7 +66,11 @@ public class Enigma implements Encrypter, Decrypter {
 			for (int i = from; from < to ? i < to : i >= to; i += direction) {
 				index = index + direction * rotorPositions[i];
 			}
-			chars[c] = (char) (index + ALPHABET[0]);
+			index %= ALPHABET.length;
+			if(index < 0)
+				index += ALPHABET.length;
+//			chars[c] = (char) (index + ALPHABET[0]);
+			chars[c] = ALPHABET[index];
 			rotorTick();
 		}
 		return new String(chars);
