@@ -7,18 +7,16 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * @author Martin Schrimpf
- * @created 30.07.2014
- */
 public class EnigmaAnalyzer implements CryptAnalyzer {
 	private final TextScore textScore;
 	private final Pattern whitespacePattern;
 	private static final int ALPHABET_SIZE = Enigma.ALPHABET.length;
+	private final Enigma machine;
 	private final int rotors;
 
-	public EnigmaAnalyzer(final int rotors) throws IOException {
-		this.rotors = rotors;
+	public EnigmaAnalyzer(final Enigma machine) throws IOException {
+		this.machine = machine;
+		this.rotors = machine.getRotors();
 		textScore = new BigramCalculator();
 		whitespacePattern = Pattern.compile("\\s");
 	}
@@ -32,7 +30,6 @@ public class EnigmaAnalyzer implements CryptAnalyzer {
 	public String findKey(String ciphertext) {
 		if (!StringUtils.isAllUpperCase(ciphertext))
 			throw new IllegalArgumentException("Ciphertext is not all upper-case");
-		final Enigma encrypter = new Enigma();
 		final BestKeyStore bestKey = new BestKeyStore();
 		// Search all possible keys by utilizing maths instead of nested for loops
 		// (this also allows a variable amount of rotors).
@@ -47,7 +44,7 @@ public class EnigmaAnalyzer implements CryptAnalyzer {
 				final int index = (int) (num / Math.pow(ALPHABET_SIZE, k)) % ALPHABET_SIZE;
 				key = String.valueOf(Enigma.ALPHABET[index]) + key; // make order AAA, AAB... instead of AAA, BAA...
 			}
-			final String plaintext = encrypter.decrypt(ciphertext, key);
+			final String plaintext = machine.decrypt(ciphertext, key);
 			// save some score computing time by validating the plaintext
 			if (!isEncodedProperly(ciphertext, plaintext))
 				continue;

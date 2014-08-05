@@ -1,33 +1,55 @@
 package nz.ac.aut.hss.encrypt;
 
 /**
- * @author Martin Schrimpf
+ * @see <a href="http://www.codesandciphers.org.uk/enigma/enigma3.htm">documentation</a>,
+ * <a href="http://www.codesandciphers.org.uk/enigma/rotorspec.htm">rotor specification</a>,
+ * <a href="http://www.codesandciphers.org.uk/enigma/example1.htm">example</a>
  */
 public class Enigma implements Encrypter, Decrypter {
 	public static final char[] ALPHABET =
 			{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
 					'V', 'W', 'X', 'Y', 'Z'};
+	/**
+	 * Follows the actual rotor orders.
+	 * See http://www.codesandciphers.org.uk/enigma/rotorspec.htm
+	 */
+	public static final char[][] ALPHABET_SCRAMBLED = {
+			// 1
+			{'E', 'K', 'M', 'F', 'L', 'G', 'D', 'Q', 'V', 'Z', 'N', 'T', 'O', 'W', 'Y', 'H', 'X', 'U', 'S', 'P', 'A',
+					'I', 'B', 'R', 'C', 'J'},
+			// 2
+			{'A', 'J', 'D', 'K', 'S', 'I', 'R', 'U', 'X', 'B', 'L', 'H', 'W', 'T', 'M', 'C', 'Q', 'G', 'Z', 'N', 'P',
+					'Y', 'F', 'V', 'O', 'E'},
+			// 3
+			{'B', 'D', 'F', 'H', 'J', 'L', 'C', 'P', 'R', 'T', 'X', 'V', 'Z', 'N', 'Y', 'E', 'I', 'W', 'G', 'A', 'K',
+					'M', 'U', 'S', 'Q', 'O'},
+			// 4
+			{'E', 'S', 'O', 'V', 'P', 'Z', 'J', 'A', 'Y', 'Q', 'U', 'I', 'R', 'H', 'X', 'L', 'N', 'F', 'T', 'G', 'K',
+					'D', 'C', 'M', 'W', 'B'},
+			// 5
+			{'V', 'Z', 'B', 'R', 'G', 'I', 'T', 'Y', 'U', 'P', 'S', 'D', 'N', 'H', 'L', 'X', 'A', 'W', 'M', 'J', 'Q',
+					'O', 'F', 'E', 'C', 'K'},
+			// 6
+			{'J', 'P', 'G', 'V', 'O', 'U', 'M', 'F', 'Y', 'Q', 'B', 'E', 'N', 'H', 'Z', 'R', 'D', 'K', 'A', 'S', 'X',
+					'L', 'I', 'C', 'T', 'W'},
+			// 7
+			{'N', 'Z', 'J', 'H', 'G', 'R', 'C', 'X', 'M', 'Y', 'S', 'W', 'B', 'O', 'U', 'F', 'A', 'I', 'V', 'L', 'P',
+					'E', 'K', 'Q', 'D', 'T'},
+			// 8
+			{'F', 'K', 'Q', 'H', 'T', 'L', 'X', 'O', 'C', 'B', 'J', 'S', 'P', 'D', 'Z', 'R', 'A', 'M', 'E', 'W', 'N',
+					'I', 'U', 'Y', 'G', 'V'},
+	};
+
+	/** Matrix of rotors x ALPHABET_SIZE */
+	private char[][] rotors;
 
 	/** Current index of each rotor */
 	private final int[] rotorPositions;
 
 	public Enigma(final int rotors) {
 		this.rotorPositions = new int[rotors];
-//		// scramble rotors
-//		this.rotors = new char[rotors][];
-//		for (int r = 0; r < rotors; r++) {
-//			this.rotors[r] = new char[ALPHABET.length];
-//			final int everyNth = r + 1;
-//			int start = everyNth;
-//			int n = everyNth;
-//			for (int i = 0; i < this.rotors[r].length; i++) {
-//				if(n > ALPHABET.length) {
-//					n = start--;
-//				}
-//				this.rotors[r][i] = ALPHABET[n];
-//				n += everyNth;
-//			}
-//		}
+		this.rotors = new char[rotors][];
+		System.arraycopy(ALPHABET_SCRAMBLED, 0, this.rotors, 0, rotors); // fill with pre-determined
 	}
 
 	/**
@@ -37,8 +59,12 @@ public class Enigma implements Encrypter, Decrypter {
 	private void applyRotations(final String key) {
 		validateKey(key);
 		for (int i = 0; i < rotorPositions.length; i++) {
-			rotorPositions[i] = key.charAt(i) - ALPHABET[0];
+			rotorPositions[i] = key.charAt(i) - 'A';
 		}
+	}
+
+	public int getRotors() {
+		return rotorPositions.length;
 	}
 
 	private enum Mode {
@@ -62,14 +88,13 @@ public class Enigma implements Encrypter, Decrypter {
 				break;
 		}
 		for (int c = 0; c < chars.length; c++) {
-			int index = chars[c] - ALPHABET[0];
+			int index = chars[c] - 'A';
 			for (int i = from; from < to ? i < to : i >= to; i += direction) {
-				index = index + direction * rotorPositions[i];
+				index = index + direction * (rotors[i][rotorPositions[i]] - 'A');
 			}
 			index %= ALPHABET.length;
-			if(index < 0)
+			if (index < 0)
 				index += ALPHABET.length;
-//			chars[c] = (char) (index + ALPHABET[0]);
 			chars[c] = ALPHABET[index];
 			rotorTick();
 		}

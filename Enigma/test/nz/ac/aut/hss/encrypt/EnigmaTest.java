@@ -6,10 +6,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Martin Schrimpf
- * @created 04.08.2014
- */
 public class EnigmaTest {
 	private static final int ALPHABET_SIZE = Enigma.ALPHABET.length;
 	private static Enigma enigma;
@@ -24,6 +20,7 @@ public class EnigmaTest {
 		final String plaintext = "intelligencepointstoattackontheeastwallofthecastleatdawn";
 		final String key = "MAS";
 		final String ciphertext = enigma.encrypt(plaintext, key);
+		System.out.printf("%7s: %s", "Cipher", ciphertext);
 		assertTrue(StringUtils.isAlpha(ciphertext));
 		assertEquals(plaintext, enigma.decrypt(ciphertext, key));
 	}

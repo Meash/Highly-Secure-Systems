@@ -6,10 +6,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Martin Schrimpf
- * @created 31.07.2014
- */
 public class EnigmaAnalyzerTest {
 	private static EnigmaAnalyzer analyzer;
 
@@ -17,7 +13,7 @@ public class EnigmaAnalyzerTest {
 	public static void setUpBeforeClass() throws Exception {
 		System.out.print("Setting up...");
 		System.out.flush();
-		analyzer = new EnigmaAnalyzer(3);
+		analyzer = new EnigmaAnalyzer(new Enigma(3));
 		System.out.println(" complete.");
 	}
 
@@ -55,7 +51,7 @@ public class EnigmaAnalyzerTest {
 	}
 
 	private void test(final String plaintext, final String key) {
-		final Enigma enigma = new Enigma();
+		final Enigma enigma = new Enigma(3);
 		final String ciphertext = enigma.encrypt(plaintext, key);
 		System.out.printf("%15s: %s\n", "Cipher", ciphertext);
 		final String analyzedKey = analyzer.findKey(ciphertext);
