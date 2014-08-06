@@ -2,6 +2,7 @@ package nz.ac.aut.hss;
 
 import nz.ac.aut.hss.cryptanalysis.EnigmaAnalyzer;
 import nz.ac.aut.hss.encrypt.Enigma;
+import nz.ac.aut.hss.encrypt.ReflectorEnigma;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -23,7 +24,7 @@ public class Main {
 		// collect arguments
 		Mode mode = null;
 		String key = null, input = null;
-		int rotors = 3;
+		int rotors = -1;
 		for (int i = 0; i < args.length; i++) {
 			switch (args[i]) {
 				case "-h":
@@ -77,9 +78,15 @@ public class Main {
 				if (key == null) {
 					throw new IllegalArgumentException("No key specified");
 				}
+				key = key.toUpperCase();
 				if (input == null) {
 					throw new IllegalArgumentException("No input specified");
 				}
+				if (rotors != -1) {
+					System.out.println("Warning: Amount of rotors will be adjusted " +
+							"to the key length (" + key.length() + ")");
+				}
+				rotors = key.length();
 				break;
 			case ATTACK:
 				if (key != null) {
@@ -88,29 +95,35 @@ public class Main {
 				if (input == null) {
 					throw new IllegalArgumentException("No input specified");
 				}
+				if (rotors <= 0) {
+					rotors = 3;
+					System.out.println("Warning: amount of rotors set to 3 by default");
+				}
 				break;
 		}
 
 		// execute
-		final Enigma enigma = new Enigma(rotors);
+		final Enigma enigma = new ReflectorEnigma(rotors);
 		switch (mode) {
 			case ENCRYPT:
-				System.out.printf("Encrypting the following plaintext with %d rotors and key %s: %s\n", rotors, key,
-						input);
+				System.out.printf("Encrypting the following plaintext with %d rotors and key %s: %s\n",
+						rotors, key, input);
 				final String ciphertext = enigma.encrypt(input, key);
 				System.out.printf("%s: %s\n", "Ciphertext", ciphertext);
 				break;
 			case DECRYPT:
-				System.out.printf("Decrypting the following ciphertext with %d rotors and key %s: %s\n", rotors, key,
-						input);
+				System.out.printf("Decrypting the following ciphertext with %d rotors and key %s: %s\n",
+						rotors, key, input);
 				final String plaintext = enigma.decrypt(input, key);
 				System.out.printf("%s: %s\n", "Plaintext", plaintext);
 				break;
 			case ATTACK:
 				System.out.printf("Attacking the following ciphertext with %d rotors: %s\n", rotors, input);
+				long time = System.currentTimeMillis();
 				final String analyzedKey = new EnigmaAnalyzer(enigma).findKey(input);
+				time = System.currentTimeMillis() - time;
 				final String analyzedPlaintext = enigma.decrypt(input, analyzedKey);
-				System.out.printf("%s: %s\n", "Plaintext", analyzedPlaintext);
+				System.out.printf("%s: %s (Key %s, %dms)\n", "Plaintext", analyzedPlaintext, analyzedKey, time);
 				break;
 		}
 	}

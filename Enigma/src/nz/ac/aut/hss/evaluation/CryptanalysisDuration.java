@@ -2,6 +2,7 @@ package nz.ac.aut.hss.evaluation;
 
 import nz.ac.aut.hss.cryptanalysis.EnigmaAnalyzer;
 import nz.ac.aut.hss.encrypt.Enigma;
+import nz.ac.aut.hss.encrypt.ReflectorEnigma;
 import nz.ac.aut.hss.util.KeyUtils;
 import nz.ac.aut.hss.util.Stats;
 
@@ -36,7 +37,7 @@ public class CryptanalysisDuration {
 		for (int rotors = rotorsMin; rotors <= rotorsMax; rotors += rotorsStep) {
 			System.out.print(rotors + ",");
 			final String key = KeyUtils.randomKey(rotors, Enigma.ALPHABET);
-			final Enigma enigma = new Enigma(rotors);
+			final Enigma enigma = new ReflectorEnigma(rotors);
 			final String ciphertext = enigma.encrypt(plaintext, key);
 			final EnigmaAnalyzer analyzer = new EnigmaAnalyzer(enigma);
 			final Stats stats = new Stats();
@@ -50,6 +51,6 @@ public class CryptanalysisDuration {
 	}
 
 	public static void main(String[] args) throws IOException {
-		new CryptanalysisDuration(10).run(1, 5, 1);
+		new CryptanalysisDuration(3).run(1, 5, 1);
 	}
 }

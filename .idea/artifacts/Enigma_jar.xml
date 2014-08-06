@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Enigma:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Enigma_jar</output-path>
+    <root id="archive" name="Enigma.jar">
+      <element id="module-output" name="Enigma" />
+      <element id="module-output" name="Utilities" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Enigma/lib/commons-lang3-3.3.2.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
