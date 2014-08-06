@@ -40,15 +40,11 @@ public class Enigma implements Encrypter, Decrypter {
 					'I', 'U', 'Y', 'G', 'V'},
 	};
 
-	private static final char[] REFLECTOR = 
-                        {'Y', 'R', 'U', 'H', 'Q', 'S', 'L', 'D', 'P', 'X', 'N', 'G', 'O', 'K', 'M', 'I', 'E', 'B', 'F', 'Z', 'C',
-                                        'W', 'V', 'J', 'A', 'T'};
-
 	/** Matrix of rotors x ALPHABET_SIZE */
-	private char[][] rotors;
+	protected char[][] rotors;
 
 	/** Current index of each rotor */
-	private final int[] rotorPositions;
+	protected final int[] rotorPositions;
 
 	public Enigma(final int rotors) {
 		this.rotorPositions = new int[rotors];
@@ -60,7 +56,7 @@ public class Enigma implements Encrypter, Decrypter {
 	 * Rotates the rotors to the initial position as indicated by the key.
 	 * @param key the key consisting of upper-case alpha characters only
 	 */
-	private void applyRotations(final String key) {
+	protected void applyRotations(final String key) {
 		validateKey(key);
 		for (int i = 0; i < rotorPositions.length; i++) {
 			rotorPositions[i] = key.charAt(i) - 'A';
@@ -105,39 +101,7 @@ public class Enigma implements Encrypter, Decrypter {
 		return new String(chars);
 	}
 
-	/**
-     * Encrypt a text using reflector. Also used for decrypting.
-     * If 3 rotor was used, this algorithm will use total of 7 rotors.
-     * 3 rotor + reflector + 3 rotor backwards.
-     * @param input
-     * @return encrypted or decrypted text
-     */
-    private String encodeWithReflector(String input) {
-		char[] chars = input.toCharArray();
-        for (int c = 0; c < chars.length; c++) {
-            int index = chars[c] - 'A';
-            //Forwards
-            for(int i = 0; i < rotorPositions.length;i++){
-                index = index + (rotors[i][rotorPositions[i]] - 'A');
-            }
-            index %= ALPHABET.length;
-            //Reflector
-            index = REFLECTOR[index] - 'A';
-            //Backwards
-            for(int i = rotorPositions.length-1; 0 <= i;i--){
-                index = index - (rotors[i][rotorPositions[i]] - 'A');
-            }
-            index %= ALPHABET.length;
-            if (index < 0)
-				index += ALPHABET.length;
-            //Done
-			chars[c] = ALPHABET[index];
-            rotorTick();
-        }   
-		return new String(chars);
-	}
-
-	private void rotorTick() {
+	protected void rotorTick() {
 		rotorPositions[0]++; // always move first rotor
 		for (int i = 0; i < rotorPositions.length; i++) {
 			if (rotorPositions[i] == ALPHABET.length) { // full rotation reached
@@ -161,19 +125,7 @@ public class Enigma implements Encrypter, Decrypter {
 		return encode(ciphertext, Mode.DECODE).toLowerCase();
 	}
 
-	@Override
-    public String encryptWithReflector(String plaintext, String Key) {
-        applyRotations(Key);
-        return encodeWithReflector(plaintext.toUpperCase());
-    }
-
-    @Override
-    public String decryptWithReflector(String cipherText, String key) {
-        applyRotations(key);
-        return encodeWithReflector(cipherText.toUpperCase()).toLowerCase();
-    }
-
-	private void validateKey(final String key) {
+	protected void validateKey(final String key) {
 		// length
 		if (key.length() != rotorPositions.length)
 			throw new IllegalArgumentException("Key length (" + key.length() + ") must be equal " +
