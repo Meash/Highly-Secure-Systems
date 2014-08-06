@@ -1,8 +1,8 @@
 package nz.ac.aut.hss.encrypt;
 
-public class EnigmaTest extends AbstractEnigmaTest {
+public class ReflectorEnigmaTest extends AbstractEnigmaTest {
 	@Override
 	public Enigma createMachine(final int rotors) {
-		return new Enigma(3);
+		return new ReflectorEnigma(3);
 	}
 }
