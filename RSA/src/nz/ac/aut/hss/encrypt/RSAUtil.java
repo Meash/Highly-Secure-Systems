@@ -28,4 +28,12 @@ public class RSAUtil {
 	public static BigInteger modularExponentiation(BigInteger a, BigInteger b, BigInteger n) {
 		return null; // TODO
 	}
+
+	public static BigInteger toNumber(String str) {
+		return new BigInteger(str.getBytes());
+	}
+
+	public static String toString(BigInteger n) {
+		new String(n.toByteArray());
+	}
 }
