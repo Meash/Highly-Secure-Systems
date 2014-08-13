@@ -13,14 +13,26 @@ public class RSAUtil {
 		return true; // TODO
 	}
 
-	public static EudlidResult extendedEuclid(BigInteger m, BigInteger n) {
+	public static EuclidResult extendedEuclid(BigInteger m, BigInteger n) {
+		BigInteger d = m.gcd(n);
+		BigInteger zero = new BigInteger("0");
+		BigInteger one = new BigInteger("1");
+		if(n.equals(zero)){
+			return new EuclidResult(m, one, zero);
+		}
+		EuclidResult resultPrime = extendedEuclid(n, m.mod(n));
+		BigInteger q = m.divide(n);
+		return new EuclidResult(resultPrime.d, resultPrime.t, resultPrime.s.subtract(q.multiply(resultPrime.t)));
+	}
+
+	public static RSAKeyPair generateKeyPair() {
 		return null; // TODO
 	}
 
-	private static class EudlidResult {
+	private static class EuclidResult {
 		public final BigInteger d, s, t;
 
-		public EudlidResult(BigInteger d, BigInteger s, BigInteger t) {
+		public EuclidResult(BigInteger d, BigInteger s, BigInteger t) {
 			this.d = d;
 			this.s = s;
 			this.t = t;

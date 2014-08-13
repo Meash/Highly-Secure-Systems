@@ -21,12 +21,4 @@ public class RSA {
 		return RSAUtil.toString(C);
 	}
 
-	public static class RSAKey {
-		public final BigInteger modulo, exponent;
-
-		public RSAKey(final BigInteger modulo, final BigInteger exponent) {
-			this.modulo = modulo;
-			this.exponent = exponent;
-		}
-	}
 }
