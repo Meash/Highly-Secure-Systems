@@ -1,32 +1,52 @@
 package nz.ac.aut.hss.encrypt;
 
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author Martin Schrimpf
  * @created 13.08.2014
  */
 public class RSAUtil {
-	public static boolean probablyPrime(BigInteger n) {
-		return true; // TODO
+	private static final Random ran = new SecureRandom();
+
+	public static BigInteger probablePrime(int bits) {
+		return MillerRabin.randomBig(BigInteger.valueOf(bits), ran);
+//		return BigInteger.probablePrime(bits, ran);
 	}
 
 	public static EuclidResult extendedEuclid(BigInteger m, BigInteger n) {
-		BigInteger d = m.gcd(n);
-		BigInteger zero = new BigInteger("0");
-		BigInteger one = new BigInteger("1");
-		if(n.equals(zero)){
-			return new EuclidResult(m, one, zero);
+		final BigInteger ZERO = new BigInteger("0");
+		final BigInteger ONE = new BigInteger("1");
+		if (n.equals(ZERO)) {
+			return new EuclidResult(m, ONE, ZERO);
 		}
 		EuclidResult resultPrime = extendedEuclid(n, m.mod(n));
 		BigInteger q = m.divide(n);
 		return new EuclidResult(resultPrime.d, resultPrime.t, resultPrime.s.subtract(q.multiply(resultPrime.t)));
 	}
 
-	public static RSAKeyPair generateKeyPair() {
-		return null; // TODO
+	public static RSAKeyPair generateKeyPair(int bits) {
+		if (bits < 512) {
+			bits = 512;
+		}
+
+		BigInteger p = probablePrime(bits);
+		BigInteger q = probablePrime(bits);
+
+		BigInteger n = p.multiply(q);
+		BigInteger totient = p.subtract(BigInteger.valueOf(1)).multiply(q.subtract(BigInteger.valueOf(1)));
+		int e = 65537;
+		BigInteger d = extendedEuclid(BigInteger.valueOf(e), totient).d;
+		while (d.compareTo(BigInteger.valueOf(0)) == -1) {
+			d = d.add(n);
+		}
+		RSAKey privateKey = new RSAKey(n, d);
+		RSAKey publicKey = new RSAKey(n, BigInteger.valueOf(e));
+		return new RSAKeyPair(privateKey, publicKey);
 	}
 
 	private static class EuclidResult {
@@ -40,7 +60,17 @@ public class RSAUtil {
 	}
 
 	public static BigInteger modularExponentiation(BigInteger a, BigInteger b, BigInteger n) {
-		return null; // TODO
+		BigInteger result = BigInteger.ONE;
+		final BigInteger TWO = new BigInteger("2");
+
+		while (b.compareTo(BigInteger.ZERO) == 1) {
+			if (b.mod(TWO).compareTo(BigInteger.ONE) == 0)
+				result = (result.multiply(a)).mod(n);
+			b = b.divide(TWO);
+			a = (a.multiply(a)).mod(n);
+		}
+
+		return result;
 	}
 
 	public static BigInteger toNumber(String str) {

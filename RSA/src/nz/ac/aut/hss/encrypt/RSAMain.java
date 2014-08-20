@@ -11,9 +11,10 @@ public class RSAMain {
 
 	private void run() {
 		final RSA rsa = new RSA();
-		final RSAKeyPair keys = RSAUtil.generateKeyPair();
+		final RSAKeyPair keys = RSAUtil.generateKeyPair(512);
 		final String plaintext = "Hi IAmA test";
 		final String ciphertext = rsa.convert(plaintext, keys.publicKey);
+		System.out.println("Plaintext: " + plaintext);
 		System.out.println("Ciphertext: " + ciphertext);
 		System.out.println("Reconstructed plain: " + rsa.convert(ciphertext, keys.privateKey));
 	}

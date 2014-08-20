@@ -20,5 +20,4 @@ public class RSA {
 		BigInteger C = RSAUtil.modularExponentiation(P, key.exponent, key.modulo);
 		return RSAUtil.toString(C);
 	}
-
 }
