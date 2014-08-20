@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/Enigma/Enigma.iml" filepath="$PROJECT_DIR$/Enigma/Enigma.iml" />
       <module fileurl="file://$PROJECT_DIR$/RC4/RC4.iml" filepath="$PROJECT_DIR$/RC4/RC4.iml" />
       <module fileurl="file://$PROJECT_DIR$/RSA/RSA.iml" filepath="$PROJECT_DIR$/RSA/RSA.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SecureDistributedSystem/SecureDistributedSystem.iml" filepath="$PROJECT_DIR$/SecureDistributedSystem/SecureDistributedSystem.iml" />
       <module fileurl="file://$PROJECT_DIR$/Steganography/Steganography.iml" filepath="$PROJECT_DIR$/Steganography/Steganography.iml" />
       <module fileurl="file://$PROJECT_DIR$/Utilities/Utilities.iml" filepath="$PROJECT_DIR$/Utilities/Utilities.iml" />
     </modules>
