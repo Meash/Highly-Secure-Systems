@@ -8,11 +8,13 @@ public class PublicKeyMessage extends Message {
 	public final String phone;
 	public final String publicKey;
 
+	/**
+	 * @param phone     the phone number of the client
+	 * @param publicKey the public key of the client or null for a request
+	 */
 	public PublicKeyMessage(final String phone, final String publicKey) {
-		if (phone != null && publicKey != null)
-			throw new IllegalArgumentException("Either phone or public key should be null");
-		if (phone == null && publicKey == null)
-			throw new IllegalArgumentException("Both phone and public key are null");
+		if (phone == null)
+			throw new IllegalArgumentException("Phone must not be null");
 		this.phone = phone;
 		this.publicKey = publicKey;
 	}

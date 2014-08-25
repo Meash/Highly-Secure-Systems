@@ -24,6 +24,6 @@ public class PublicKeyRequestHandler implements RequestHandler {
 		final PublicKeyMessage request = (PublicKeyMessage) input;
 		final Map<String, String> phonePublicKey = authority.getClientList();
 		final String publicKey = phonePublicKey.get(request.phone);
-		return new PublicKeyMessage(null, publicKey);
+		return new PublicKeyMessage(request.phone, publicKey);
 	}
 }
