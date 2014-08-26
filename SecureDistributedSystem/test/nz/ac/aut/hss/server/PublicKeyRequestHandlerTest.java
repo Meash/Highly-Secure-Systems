@@ -32,15 +32,15 @@ public class PublicKeyRequestHandlerTest {
 	@Test
 	public void clientDoesNotExist() {
 		final String phone = "123456";
-		Message msg = handler.processInput(new PublicKeyMessage(phone, null));
+		Message msg = handler.processInput("1", new PublicKeyMessage(phone, null));
 		assertTrue(msg instanceof ClientDoesNotExistMessage);
 	}
 
 	@Test
 	public void singleClient() {
 		final String phone = "123456";
-		authority.addClient(phone, ECCKeyGen.create());
-		Message msg = handler.processInput(new PublicKeyMessage(phone, null));
+		authority.addClientPublicKey(phone, ECCKeyGen.create());
+		Message msg = handler.processInput("1", new PublicKeyMessage(phone, null));
 		assertTrue(msg instanceof PublicKeyMessage);
 		assertEquals(phone, ((PublicKeyMessage) msg).phone);
 		assertNotNull(((PublicKeyMessage) msg).publicKey);

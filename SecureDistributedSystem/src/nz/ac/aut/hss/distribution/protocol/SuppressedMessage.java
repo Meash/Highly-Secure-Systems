@@ -5,4 +5,7 @@ package nz.ac.aut.hss.distribution.protocol;
  * @created 25.08.2014
  */
 public class SuppressedMessage extends Message {
+	public SuppressedMessage(final EncryptionMode... encryptions) {
+		super(encryptions);
+	}
 }

@@ -20,13 +20,13 @@ public class PublicKeyRequestHandler implements RequestHandler {
 	}
 
 	@Override
-	public Message processInput(final Message input) {
+	public Message processInput(final String clientId, final Message input) {
 		if (!(input instanceof PublicKeyMessage))
 			return new ProtocolInvalidationMessage(
 					"Expected message of class " + PublicKeyMessage.class.getName() + ", got " +
 							input.getClass().getName());
 		final PublicKeyMessage request = (PublicKeyMessage) input;
-		final Map<String, ECPublicKey> phonePublicKey = authority.getClientList();
+		final Map<String, ECPublicKey> phonePublicKey = authority.getClientPublicKeys();
 		final ECPublicKey publicKey = phonePublicKey.get(request.phone);
 		if(publicKey == null)
 			return new ClientDoesNotExistMessage(request.phone);

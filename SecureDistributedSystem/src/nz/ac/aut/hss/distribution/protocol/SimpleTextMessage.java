@@ -7,7 +7,8 @@ package nz.ac.aut.hss.distribution.protocol;
 public class SimpleTextMessage extends Message {
 	public final String content;
 
-	public SimpleTextMessage(final String content) {
+	public SimpleTextMessage(final String content, final EncryptionMode... encryptions) {
+		super(encryptions);
 		this.content = content;
 	}
 }

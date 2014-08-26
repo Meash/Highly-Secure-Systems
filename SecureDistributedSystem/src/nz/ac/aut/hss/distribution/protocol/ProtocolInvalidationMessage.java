@@ -7,7 +7,8 @@ package nz.ac.aut.hss.distribution.protocol;
 public class ProtocolInvalidationMessage extends Message {
 	public final String message;
 
-	public ProtocolInvalidationMessage(final String message) {
+	public ProtocolInvalidationMessage(final String message, final EncryptionMode... encryptions) {
+		super(encryptions);
 		this.message = message;
 	}
 }

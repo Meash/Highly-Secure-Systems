@@ -25,7 +25,7 @@ public class JoinRequestHandler implements RequestHandler {
 	}
 
 	@Override
-	public Message processInput(final Message input) throws ProcessingException {
+	public Message processInput(final String clientId, final Message input) throws ProcessingException {
 		try {
 			switch (state) {
 				case AWAITING_REQUEST:
@@ -47,8 +47,9 @@ public class JoinRequestHandler implements RequestHandler {
 						return new ProtocolInvalidationMessage("No telephone number provided");
 					if (clientMessage.publicKey == null)
 						return new ProtocolInvalidationMessage("No public key provided (null)");
+					authority.addClientPublicKey(clientMessage.telephoneNumber, clientMessage.publicKey);
 					final SecretKey sessionKey = PasswordGenerator.generateSecretKey(ENCRYPTION);
-					authority.addClient(clientMessage.telephoneNumber, clientMessage.publicKey);
+					authority.addClientSessionKey(clientId, sessionKey);
 					return new SessionMessage(sessionKey, clientMessage.nonce);
 
 				default:

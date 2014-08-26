@@ -26,7 +26,7 @@ public class JoinRequestHandlerTest {
 
 	@Test
 	public void handshake() throws ProcessingException {
-		Message msg = handler.processInput(new JoinRequestMessage());
+		Message msg = handler.processInput("1", new JoinRequestMessage());
 		assertEquals(SuppressedMessage.class, msg.getClass());
 	}
 
@@ -34,7 +34,7 @@ public class JoinRequestHandlerTest {
 	public void twoStep() throws ProcessingException {
 		handshake();
 		final String nonce = "1";
-		Message msg = handler.processInput(new ClientInformationMessage("12345", ECCKeyGen.create(), nonce));
+		Message msg = handler.processInput("1", new ClientInformationMessage("12345", ECCKeyGen.create(), nonce));
 		assertTrue(msg instanceof SessionMessage);
 		assertNotNull(((SessionMessage) msg).sessionKey);
 		assertEquals(nonce, ((SessionMessage) msg).nonce);

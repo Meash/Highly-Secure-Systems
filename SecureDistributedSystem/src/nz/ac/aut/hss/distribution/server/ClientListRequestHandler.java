@@ -1,6 +1,7 @@
 package nz.ac.aut.hss.distribution.server;
 
 import nz.ac.aut.hss.distribution.protocol.ClientListMessage;
+import nz.ac.aut.hss.distribution.protocol.ClientListRequestMessage;
 import nz.ac.aut.hss.distribution.protocol.Message;
 import nz.ac.aut.hss.distribution.protocol.ProtocolInvalidationMessage;
 
@@ -16,11 +17,11 @@ public class ClientListRequestHandler implements RequestHandler {
 	}
 
 	@Override
-	public Message processInput(final Message input) {
-		if (!(input instanceof ClientListMessage))
+	public Message processInput(final String clientId, final Message input) {
+		if (!(input instanceof ClientListRequestMessage))
 			return new ProtocolInvalidationMessage(
 					"Expected message of class " + ClientListMessage.class.getName() + ", got " +
 							input.getClass().getName());
-		return new ClientListMessage(authority.getClientList());
+		return new ClientListMessage(authority.getClientPublicKeys());
 	}
 }

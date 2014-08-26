@@ -11,8 +11,8 @@ public class SessionMessage extends Message {
 	public final SecretKey sessionKey;
 	public final String nonce;
 
-	public SessionMessage(final SecretKey sessionKey, final String nonce) {
-		super();
+	public SessionMessage(final SecretKey sessionKey, final String nonce, final EncryptionMode... encryptions) {
+		super(encryptions);
 		this.sessionKey = sessionKey;
 		this.nonce = nonce;
 	}
