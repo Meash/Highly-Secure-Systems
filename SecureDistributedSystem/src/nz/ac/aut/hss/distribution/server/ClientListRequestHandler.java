@@ -1,6 +1,8 @@
-package nz.ac.aut.hss.distribution.protocol;
+package nz.ac.aut.hss.distribution.server;
 
-import nz.ac.aut.hss.distribution.server.KeyAuthority;
+import nz.ac.aut.hss.distribution.protocol.ClientListMessage;
+import nz.ac.aut.hss.distribution.protocol.Message;
+import nz.ac.aut.hss.distribution.protocol.ProtocolInvalidationMessage;
 
 /**
  * @author Martin Schrimpf

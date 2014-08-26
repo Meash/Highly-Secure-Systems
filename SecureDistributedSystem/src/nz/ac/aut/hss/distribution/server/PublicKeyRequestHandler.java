@@ -1,7 +1,11 @@
-package nz.ac.aut.hss.distribution.protocol;
+package nz.ac.aut.hss.distribution.server;
 
-import nz.ac.aut.hss.distribution.server.KeyAuthority;
+import nz.ac.aut.hss.distribution.protocol.ClientDoesNotExistMessage;
+import nz.ac.aut.hss.distribution.protocol.Message;
+import nz.ac.aut.hss.distribution.protocol.ProtocolInvalidationMessage;
+import nz.ac.aut.hss.distribution.protocol.PublicKeyMessage;
 
+import java.security.interfaces.ECPublicKey;
 import java.util.Map;
 
 /**
@@ -22,8 +26,10 @@ public class PublicKeyRequestHandler implements RequestHandler {
 					"Expected message of class " + PublicKeyMessage.class.getName() + ", got " +
 							input.getClass().getName());
 		final PublicKeyMessage request = (PublicKeyMessage) input;
-		final Map<String, String> phonePublicKey = authority.getClientList();
-		final String publicKey = phonePublicKey.get(request.phone);
+		final Map<String, ECPublicKey> phonePublicKey = authority.getClientList();
+		final ECPublicKey publicKey = phonePublicKey.get(request.phone);
+		if(publicKey == null)
+			return new ClientDoesNotExistMessage(request.phone);
 		return new PublicKeyMessage(request.phone, publicKey);
 	}
 }
