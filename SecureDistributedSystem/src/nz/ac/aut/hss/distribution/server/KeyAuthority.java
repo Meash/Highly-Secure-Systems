@@ -1,16 +1,23 @@
 package nz.ac.aut.hss.distribution.server;
 
+import nz.ac.aut.hss.distribution.crypt.AESEncrypter;
 import nz.ac.aut.hss.distribution.protocol.*;
 import nz.ac.aut.hss.distribution.util.Base64Coder;
 import nz.ac.aut.hss.distribution.util.ObjectFileStore;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.ProtocolException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +27,6 @@ import java.util.Map;
  * @created 25.08.2014
  */
 public class KeyAuthority {
-	private static final Path CLIENT_SESSION_FILE = Paths.get("sessions.obj");
 	private static final Path CLIENT_PUBLICKEY_FILE = Paths.get("clients-publickeys.obj");
 
 	private final Map<Class<? extends Message>, RequestHandler> requestAssignments = new HashMap<>();
@@ -38,17 +44,18 @@ public class KeyAuthority {
 		requestAssignments.put(PublicKeyMessage.class, new PublicKeyRequestHandler(this));
 
 		serializer = new ObjectSerializer();
+		//noinspection unchecked
 		clientPublicKeys = loadMap(CLIENT_PUBLICKEY_FILE);
-		clientSessionKeys = loadMap(CLIENT_SESSION_FILE);
-		// TODO store session keys? ports change on reboot
-		// - could put phone number in every message instead
+		clientSessionKeys = new HashMap<>();
 	}
 
 	private Map loadMap(Path filePath) throws IOException, ClassNotFoundException {
 		if (Files.exists(filePath)) {
 			Object clientListObject = new ObjectFileStore(filePath).retrieve();
 			if (!(clientListObject instanceof Map))
-				throw new IllegalStateException("Client list is of the wrong class");
+				throw new IllegalStateException(
+						"Client list is of the wrong class - expected " + Map.class.getName() + ", got " +
+								clientListObject.getClass().getName());
 			return (Map) clientListObject;
 		} else {
 			return new HashMap<>();
@@ -74,11 +81,17 @@ public class KeyAuthority {
 		if ((outputMessage instanceof SuppressedMessage))
 			return "";
 		final String serial = serializer.serialize(outputMessage);
-		return applyEncryptions(clientId, serial, outputMessage.encryptions);
+		try {
+			return applyEncryptions(clientId, serial, outputMessage.encryptions);
+		} catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+			throw new ProcessingException("Could not encrypt message", e);
+		}
 	}
 
 	private String applyEncryptions(final String clientId, final String serial,
-									final Message.EncryptionMode[] encryptions) {
+									final Message.EncryptionMode[] encryptions)
+			throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException,
+			IllegalBlockSizeException, BadPaddingException {
 		String output = serial;
 		for (Message.EncryptionMode encryption : encryptions) {
 			switch (encryption) {
@@ -86,9 +99,11 @@ public class KeyAuthority {
 					output = Base64Coder.encodeString(output);
 					break;
 				case SESSION_KEY:
-					final SecretKey key = clientSessionKeys.get(clientId);
+					final SecretKey secretKey = clientSessionKeys.get(clientId);
+					output = new AESEncrypter(secretKey).encrypt(output);
 					break;
 				case CLIENT_PUBLIC_KEY:
+					final ECPublicKey publicKey = clientPublicKeys.get("TODO: phone"); // TODO
 					break;
 			}
 		}
@@ -118,7 +133,6 @@ public class KeyAuthority {
 
 	public void storeState() throws IOException {
 		new ObjectFileStore(CLIENT_PUBLICKEY_FILE).store(clientPublicKeys);
-		new ObjectFileStore(CLIENT_SESSION_FILE).store(clientSessionKeys);
 	}
 
 	public Map<String, ECPublicKey> getClientPublicKeys() {

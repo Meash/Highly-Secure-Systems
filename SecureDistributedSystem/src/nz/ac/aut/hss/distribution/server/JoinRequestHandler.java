@@ -33,7 +33,7 @@ public class JoinRequestHandler implements RequestHandler {
 						return new ProtocolInvalidationMessage("Expecting join request, got '" + input + "'");
 					final String password =
 							PasswordGenerator.generateRandomPassword(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH);
-					System.out.println("Convey this password confidentially: " + password);
+					System.out.println(">> Convey this password confidentially: " + password);
 					state = State.AWAITING_PUBLIC_KEY; // only step forward on success
 					return new SuppressedMessage();
 

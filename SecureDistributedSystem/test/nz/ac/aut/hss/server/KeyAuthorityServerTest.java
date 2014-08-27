@@ -1,8 +1,11 @@
 package nz.ac.aut.hss.server;
 
+import nz.ac.aut.hss.distribution.protocol.ClientInformationMessage;
 import nz.ac.aut.hss.distribution.protocol.JoinRequestMessage;
+import nz.ac.aut.hss.distribution.protocol.SessionMessage;
 import nz.ac.aut.hss.distribution.server.KeyAuthorityServer;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
+import nz.ac.aut.hss.util.ECCKeyGen;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Martin Schrimpf
@@ -29,20 +34,22 @@ public class KeyAuthorityServerTest {
 	}
 
 	@Test
-	public void test() throws IOException {
+	public void test() throws IOException, ClassNotFoundException {
 		server.start();
 		Socket sock = new Socket("localhost", port);
-		System.out.println("Connecting...");
 
 		// receive file
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 				PrintWriter out = new PrintWriter(sock.getOutputStream(), true)) {
-			out.write(serializer.serialize(new JoinRequestMessage()));
-			String line;
-			while ((line = in.readLine()) != null) {
-				System.out.println(line);
-			}
+			out.println(serializer.serialize(new JoinRequestMessage()));
+			final String nonce = "somenonce";
+			out.println(serializer.serialize(new ClientInformationMessage("12345", ECCKeyGen.create(), nonce)));
+			String line = in.readLine();
+			Object msg = new ObjectSerializer().deserialize(line);
+			assertEquals(SessionMessage.class, msg.getClass());
+			assertEquals(nonce, ((SessionMessage) msg).nonce);
 		}
+		sock.close();
 	}
 
 	@After
