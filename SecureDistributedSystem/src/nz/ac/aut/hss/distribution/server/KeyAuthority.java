@@ -1,23 +1,17 @@
 package nz.ac.aut.hss.distribution.server;
 
-import nz.ac.aut.hss.distribution.crypt.AESEncrypter;
+import nz.ac.aut.hss.distribution.crypt.CryptException;
+import nz.ac.aut.hss.distribution.crypt.MessageEncrypter;
 import nz.ac.aut.hss.distribution.protocol.*;
-import nz.ac.aut.hss.distribution.util.Base64Coder;
 import nz.ac.aut.hss.distribution.util.ObjectFileStore;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.ProtocolException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +26,7 @@ public class KeyAuthority {
 	private final Map<Class<? extends Message>, RequestHandler> requestAssignments = new HashMap<>();
 
 	private final ObjectSerializer serializer;
+	private final MessageEncrypter messageEncrypter;
 	private RequestHandler handler;
 	/** Phone -> public key */
 	private final Map<String, ECPublicKey> clientPublicKeys;
@@ -44,6 +39,7 @@ public class KeyAuthority {
 		requestAssignments.put(PublicKeyMessage.class, new PublicKeyRequestHandler(this));
 
 		serializer = new ObjectSerializer();
+		messageEncrypter = new MessageEncrypter();
 		//noinspection unchecked
 		clientPublicKeys = loadMap(CLIENT_PUBLICKEY_FILE);
 		clientSessionKeys = new HashMap<>();
@@ -80,34 +76,12 @@ public class KeyAuthority {
 			return null;
 		if ((outputMessage instanceof SuppressedMessage))
 			return "";
-		final String serial = serializer.serialize(outputMessage);
 		try {
-			return applyEncryptions(clientId, serial, outputMessage.encryptions);
-		} catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+			outputMessage = messageEncrypter.applyEncryptions(outputMessage);
+			return serializer.serialize(outputMessage);
+		} catch (CryptException e) {
 			throw new ProcessingException("Could not encrypt message", e);
 		}
-	}
-
-	private String applyEncryptions(final String clientId, final String serial,
-									final Message.EncryptionMode[] encryptions)
-			throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException,
-			IllegalBlockSizeException, BadPaddingException {
-		String output = serial;
-		for (Message.EncryptionMode encryption : encryptions) {
-			switch (encryption) {
-				case BASE64:
-					output = Base64Coder.encodeString(output);
-					break;
-				case SESSION_KEY:
-					final SecretKey secretKey = clientSessionKeys.get(clientId);
-					output = new AESEncrypter(secretKey).encrypt(output);
-					break;
-				case CLIENT_PUBLIC_KEY:
-					final ECPublicKey publicKey = clientPublicKeys.get("TODO: phone"); // TODO
-					break;
-			}
-		}
-		return output;
 	}
 
 	private Object deserializeInput(final String inputLine) throws ProcessingException {

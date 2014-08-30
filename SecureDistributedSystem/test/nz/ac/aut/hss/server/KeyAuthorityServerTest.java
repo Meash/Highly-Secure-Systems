@@ -1,8 +1,6 @@
 package nz.ac.aut.hss.server;
 
-import nz.ac.aut.hss.distribution.protocol.ClientInformationMessage;
-import nz.ac.aut.hss.distribution.protocol.JoinRequestMessage;
-import nz.ac.aut.hss.distribution.protocol.SessionMessage;
+import nz.ac.aut.hss.distribution.protocol.*;
 import nz.ac.aut.hss.distribution.server.KeyAuthorityServer;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
 import nz.ac.aut.hss.util.ECCKeyGen;
@@ -44,10 +42,12 @@ public class KeyAuthorityServerTest {
 			out.println(serializer.serialize(new JoinRequestMessage()));
 			final String nonce = "somenonce";
 			out.println(serializer.serialize(new ClientInformationMessage("12345", ECCKeyGen.create(), nonce)));
-			String line = in.readLine();
-			Object msg = new ObjectSerializer().deserialize(line);
-			assertEquals(SessionMessage.class, msg.getClass());
-			assertEquals(nonce, ((SessionMessage) msg).nonce);
+			final String line = in.readLine();
+			Object msgObj = serializer.deserialize(line);
+			assertEquals(EncryptedMessage.class, msgObj.getClass());
+			msgObj = serializer.deserialize(((EncryptedMessage) msgObj).content);
+			assertEquals(SessionMessage.class, msgObj.getClass());
+			assertEquals(nonce, ((SessionMessage) msgObj).nonce);
 		}
 		sock.close();
 	}

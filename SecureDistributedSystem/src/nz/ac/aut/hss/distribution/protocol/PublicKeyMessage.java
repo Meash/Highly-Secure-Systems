@@ -1,5 +1,7 @@
 package nz.ac.aut.hss.distribution.protocol;
 
+import nz.ac.aut.hss.distribution.crypt.Encryption;
+
 import java.security.interfaces.ECPublicKey;
 
 /**
@@ -14,7 +16,7 @@ public class PublicKeyMessage extends Message {
 	 * @param phone     the phone number of the client
 	 * @param publicKey the public key of the client or null for a request
 	 */
-	public PublicKeyMessage(final String phone, final ECPublicKey publicKey, final EncryptionMode... encryptions) {
+	public PublicKeyMessage(final String phone, final ECPublicKey publicKey, final Encryption... encryptions) {
 		super(encryptions);
 		if (phone == null)
 			throw new IllegalArgumentException("Phone must not be null");

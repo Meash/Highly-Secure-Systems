@@ -1,5 +1,7 @@
 package nz.ac.aut.hss.distribution.protocol;
 
+import nz.ac.aut.hss.distribution.crypt.Encryption;
+
 import javax.crypto.SecretKey;
 
 /**
@@ -11,7 +13,7 @@ public class SessionMessage extends Message {
 	public final SecretKey sessionKey;
 	public final String nonce;
 
-	public SessionMessage(final SecretKey sessionKey, final String nonce, final EncryptionMode... encryptions) {
+	public SessionMessage(final SecretKey sessionKey, final String nonce, final Encryption... encryptions) {
 		super(encryptions);
 		this.sessionKey = sessionKey;
 		this.nonce = nonce;

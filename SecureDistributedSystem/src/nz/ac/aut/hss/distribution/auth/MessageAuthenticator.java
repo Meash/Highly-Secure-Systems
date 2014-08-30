@@ -6,6 +6,8 @@ import nz.ac.aut.hss.distribution.util.ObjectSerializer;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 
 /**
  * Serializes the messages and checks their hash.
@@ -21,18 +23,19 @@ public class MessageAuthenticator {
 		hasher = new Hasher();
 	}
 
-	public boolean verify(Message msg) throws IOException {
+	public boolean verify(Message msg, final ECPublicKey publicKey, final ECPrivateKey privateKey) throws IOException {
 		if (msg.authentication == null)
 			throw new IllegalArgumentException("Message does not contain authentication hash");
 		final String authentication = msg.authentication;
 		msg.authentication = null;
-		return hash(msg).equals(authentication);
+		return hash(msg, publicKey).equals(/* decrypt() */authentication);
 	}
 
-	public String hash(final Message msg) throws IOException {
-		if(msg.authentication != null)
+	public String hash(final Message msg, final ECPublicKey key) throws IOException {
+		if (msg.authentication != null)
 			throw new IllegalStateException("Message's authentication is set already");
 		final String msgString = serializer.serialize(msg);
-		return hasher.hash(msgString);
+		final String hash = hasher.hash(msgString);
+		return /* encrypt() */ hash; // TODO encrypt with public key
 	}
 }
