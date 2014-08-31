@@ -18,25 +18,28 @@ public class MessageEncrypter {
 	}
 
 	public EncryptedMessage applyEncryptions(Message msg) throws CryptException {
+		final Encryption[] encryptions = msg.getEncryptions();
+		msg.setEncryptions(new Encryption[0]);
 		String result;
 		try {
 			result = serializer.serialize(msg);
 		} catch (IOException e) {
 			throw new CryptException("Could not serialize message", e);
 		}
-		for (int i = 0; i < msg.encryptions.length; i++) {
-			result = msg.encryptions[i].encrypt(result);
+		for (final Encryption encryption : encryptions) {
+			result = encryption.encrypt(result);
 		}
-		return new EncryptedMessage(result, msg.encryptions);
+		return new EncryptedMessage(result);
 	}
 
-	public Message decrypt(EncryptedMessage msg) throws CryptException, IOException, ClassNotFoundException {
+	public Message decrypt(EncryptedMessage msg, final Encryption[] encryptions)
+			throws CryptException, IOException, ClassNotFoundException {
 		String result = msg.content;
-		for (int i = msg.encryptions.length - 1; i >= 0; i--) {
-			result = msg.encryptions[i].decrypt(result);
+		for (int i = encryptions.length - 1; i >= 0; i--) {
+			result = encryptions[i].decrypt(result);
 		}
 		Object obj = serializer.deserialize(result);
-		if(! (obj instanceof Message))
+		if (!(obj instanceof Message))
 			throw new IllegalArgumentException("Decrypted object is not a message");
 		return (Message) obj;
 	}

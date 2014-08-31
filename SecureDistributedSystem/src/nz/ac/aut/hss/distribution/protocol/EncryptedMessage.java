@@ -7,7 +7,12 @@ import nz.ac.aut.hss.distribution.crypt.Encryption;
  * @created 31.08.2014
  */
 public class EncryptedMessage extends SimpleTextMessage {
-	public EncryptedMessage(final String content, final Encryption... encryptions) {
-		super(content, encryptions);
+	public EncryptedMessage(final String content) {
+		super(content);
+	}
+
+	@Override
+	public Encryption[] getEncryptions() {
+		throw new UnsupportedOperationException("Encryptions are not stored in encrypted message");
 	}
 }
