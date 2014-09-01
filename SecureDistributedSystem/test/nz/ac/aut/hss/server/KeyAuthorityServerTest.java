@@ -32,7 +32,7 @@ public class KeyAuthorityServerTest {
 	}
 
 	@Test
-	public void test() throws IOException, ClassNotFoundException {
+	public void sessionMessage() throws IOException, ClassNotFoundException {
 		server.start();
 		Socket sock = new Socket("localhost", port);
 

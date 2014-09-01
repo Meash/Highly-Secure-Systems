@@ -23,8 +23,8 @@ public abstract class Message implements Serializable {
 	@Nullable
 	public String authentication;
 
-	protected Message(final Encryption... encryptions) {
-		this(null, encryptions);
+	protected Message(final Encryption... encryptionIntructions) {
+		this(null, encryptionIntructions);
 	}
 
 	protected Message(final String authentication, final Encryption... encryptions) {
