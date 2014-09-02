@@ -1,19 +1,18 @@
 package nz.ac.aut.hss.server;
 
+import nz.ac.aut.hss.distribution.crypt.ECCEncryption;
 import nz.ac.aut.hss.distribution.protocol.ClientDoesNotExistMessage;
 import nz.ac.aut.hss.distribution.protocol.Message;
 import nz.ac.aut.hss.distribution.protocol.PublicKeyMessage;
 import nz.ac.aut.hss.distribution.server.KeyAuthority;
 import nz.ac.aut.hss.distribution.server.PublicKeyRequestHandler;
-import nz.ac.aut.hss.util.ECCKeyGen;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.security.interfaces.ECPublicKey;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Martin Schrimpf
@@ -37,9 +36,10 @@ public class PublicKeyRequestHandlerTest {
 	}
 
 	@Test
-	public void singleClient() {
+	public void singleClient() throws Exception {
 		final String phone = "123456";
-		authority.addClientPublicKey(phone, ECCKeyGen.create());
+		final ECPublicKey publicKey = (ECPublicKey) ECCEncryption.createKeyPair().getPublic();
+		authority.addClientPublicKey(phone, publicKey);
 		Message msg = handler.processInput("1", new PublicKeyMessage(phone, null));
 		assertTrue(msg instanceof PublicKeyMessage);
 		assertEquals(phone, ((PublicKeyMessage) msg).phone);

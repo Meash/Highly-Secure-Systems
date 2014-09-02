@@ -1,14 +1,15 @@
 package nz.ac.aut.hss.auth;
 
 import nz.ac.aut.hss.distribution.auth.MessageAuthenticator;
+import nz.ac.aut.hss.distribution.crypt.ECCEncryption;
 import nz.ac.aut.hss.distribution.protocol.ClientListRequestMessage;
 import nz.ac.aut.hss.distribution.protocol.Message;
-import nz.ac.aut.hss.util.ECCKeyGen;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 
 import static org.junit.Assert.assertFalse;
@@ -27,17 +28,22 @@ public class MessageAuthenticatorTest {
 	}
 
 	@Test
-	public void equal() throws IOException {
+	public void equal()			throws Exception {
 		final Message msg = new ClientListRequestMessage();
-		final ECPublicKey key = ECCKeyGen.create();
-		msg.authentication = authenticator.hash(msg, key);
-		assertTrue(authenticator.verify(msg, key, ECCKeyGen.privateKey()));
+		final KeyPair keyPair = ECCEncryption.createKeyPair();
+		final ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
+		final ECPrivateKey privateKey = (ECPrivateKey) keyPair.getPrivate();
+		msg.authentication = authenticator.hash(msg, publicKey);
+		assertTrue(authenticator.verify(msg, publicKey, privateKey));
 	}
 
 	@Test
-	public void diff() throws IOException {
+	public void diff()			throws Exception {
 		final Message msg = new ClientListRequestMessage();
 		msg.authentication = "random dummy auth that's not gonna work";
-		assertFalse(authenticator.verify(msg, ECCKeyGen.create(), ECCKeyGen.privateKey()));
+		final KeyPair keyPair = ECCEncryption.createKeyPair();
+		final ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
+		final ECPrivateKey privateKey = (ECPrivateKey) keyPair.getPrivate();
+		assertFalse(authenticator.verify(msg, publicKey, privateKey));
 	}
 }

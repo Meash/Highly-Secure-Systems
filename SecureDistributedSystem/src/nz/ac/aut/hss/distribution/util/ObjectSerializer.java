@@ -8,6 +8,8 @@ import java.io.*;
  */
 public class ObjectSerializer {
 	public String serialize(Object obj) throws IOException {
+		if (obj == null)
+			throw new IllegalArgumentException("object must not be null");
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				ObjectOutputStream oos = new ObjectOutputStream(baos)) {
 			oos.writeObject(obj);
@@ -15,8 +17,10 @@ public class ObjectSerializer {
 		}
 	}
 
-	public Object deserialize(String str) throws IOException, ClassNotFoundException {
-		byte[] data = Base64Coder.decode(str);
+	public Object deserialize(String serializedObject) throws IOException, ClassNotFoundException {
+		if (serializedObject == null)
+			throw new IllegalArgumentException("serial must not be null");
+		byte[] data = Base64Coder.decode(serializedObject);
 		try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
 			return ois.readObject();
 		}

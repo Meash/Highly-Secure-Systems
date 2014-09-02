@@ -1,4 +1,4 @@
-package com.example.ecc;
+package nz.ac.aut.hss.client;
 
 import java.io.*;
 import android.annotation.SuppressLint;

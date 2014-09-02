@@ -1,9 +1,12 @@
 package nz.ac.aut.hss.server;
 
-import nz.ac.aut.hss.distribution.protocol.*;
+import nz.ac.aut.hss.distribution.crypt.ECCEncryption;
+import nz.ac.aut.hss.distribution.protocol.ClientInformationMessage;
+import nz.ac.aut.hss.distribution.protocol.EncryptedMessage;
+import nz.ac.aut.hss.distribution.protocol.JoinRequestMessage;
+import nz.ac.aut.hss.distribution.protocol.SessionMessage;
 import nz.ac.aut.hss.distribution.server.KeyAuthorityServer;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
-import nz.ac.aut.hss.util.ECCKeyGen;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.security.interfaces.ECPublicKey;
 
 import static org.junit.Assert.assertEquals;
 
@@ -32,7 +36,7 @@ public class KeyAuthorityServerTest {
 	}
 
 	@Test
-	public void sessionMessage() throws IOException, ClassNotFoundException {
+	public void sessionMessage() throws Exception {
 		server.start();
 		Socket sock = new Socket("localhost", port);
 
@@ -41,7 +45,8 @@ public class KeyAuthorityServerTest {
 				PrintWriter out = new PrintWriter(sock.getOutputStream(), true)) {
 			out.println(serializer.serialize(new JoinRequestMessage()));
 			final String nonce = "somenonce";
-			out.println(serializer.serialize(new ClientInformationMessage("12345", ECCKeyGen.create(), nonce)));
+			final ECPublicKey publicKey = (ECPublicKey) ECCEncryption.createKeyPair().getPublic();
+			out.println(serializer.serialize(new ClientInformationMessage("12345", publicKey, nonce)));
 			final String line = in.readLine();
 			Object msgObj = serializer.deserialize(line);
 			assertEquals(EncryptedMessage.class, msgObj.getClass());

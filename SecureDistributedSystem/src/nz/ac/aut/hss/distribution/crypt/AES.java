@@ -17,7 +17,6 @@ public class AES extends Encryption {
 	private static final IvParameterSpec initVector =
 			new IvParameterSpec(new byte[]{1, -2, 3, -4, 5, -6, 7, -8, 9, -10, 11, -12, 13, -14, 15, -16});
 	private final SecretKey secret;
-	public static final String CHARSET = "ISO-8859-1";
 
 	public AES(final SecretKey secret) throws NoSuchPaddingException, NoSuchAlgorithmException {
 		this.secret = secret;

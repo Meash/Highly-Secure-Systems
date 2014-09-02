@@ -1,18 +1,17 @@
 package nz.ac.aut.hss.server;
 
+import nz.ac.aut.hss.distribution.crypt.ECCEncryption;
 import nz.ac.aut.hss.distribution.protocol.*;
 import nz.ac.aut.hss.distribution.server.ClientListRequestHandler;
 import nz.ac.aut.hss.distribution.server.KeyAuthority;
-import nz.ac.aut.hss.util.ECCKeyGen;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.security.interfaces.ECPublicKey;
 
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Martin Schrimpf
@@ -36,9 +35,10 @@ public class ClientListRequestHandlerTest {
 	}
 
 	@Test
-	public void singleEntry() {
+	public void singleEntry() throws Exception {
 		final String phone = "12345";
-		authority.addClientPublicKey(phone, ECCKeyGen.create());
+		final ECPublicKey publicKey = (ECPublicKey) ECCEncryption.createKeyPair().getPublic();
+		authority.addClientPublicKey(phone, publicKey);
 		Message msg = handler.processInput("1", new ClientListRequestMessage());
 		assertTrue(msg instanceof ClientListMessage);
 		assertEquals(1, ((ClientListMessage) msg).phonePublicKey.size());

@@ -6,7 +6,6 @@ import nz.ac.aut.hss.distribution.protocol.*;
 import nz.ac.aut.hss.distribution.util.ObjectFileStore;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.net.ProtocolException;
 import java.nio.file.Files;
@@ -30,8 +29,6 @@ public class KeyAuthority {
 	private RequestHandler handler;
 	/** Phone -> public key */
 	private final Map<String, ECPublicKey> clientPublicKeys;
-	/** Client ID -> session key */
-	private final Map<String, SecretKey> clientSessionKeys;
 
 	public KeyAuthority() throws IOException, ClassNotFoundException {
 		requestAssignments.put(JoinRequestMessage.class, new JoinRequestHandler(this));
@@ -42,7 +39,6 @@ public class KeyAuthority {
 		messageEncrypter = new MessageEncrypter();
 		//noinspection unchecked
 		clientPublicKeys = loadMap(CLIENT_PUBLICKEY_FILE);
-		clientSessionKeys = new HashMap<>();
 	}
 
 	private Map loadMap(Path filePath) throws IOException, ClassNotFoundException {
@@ -115,9 +111,5 @@ public class KeyAuthority {
 
 	public void addClientPublicKey(final String phone, final ECPublicKey publicKey) {
 		clientPublicKeys.put(phone, publicKey);
-	}
-
-	public void addClientSessionKey(final String clientId, final SecretKey secretKey) {
-		clientSessionKeys.put(clientId, secretKey);
 	}
 }

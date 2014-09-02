@@ -1,16 +1,18 @@
 package nz.ac.aut.hss.server;
 
+import nz.ac.aut.hss.distribution.crypt.ECCEncryption;
 import nz.ac.aut.hss.distribution.protocol.*;
 import nz.ac.aut.hss.distribution.server.JoinRequestHandler;
 import nz.ac.aut.hss.distribution.server.KeyAuthority;
 import nz.ac.aut.hss.distribution.server.ProcessingException;
-import nz.ac.aut.hss.util.ECCKeyGen;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.security.interfaces.ECPublicKey;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Martin Schrimpf
@@ -31,12 +33,12 @@ public class JoinRequestHandlerTest {
 	}
 
 	@Test
-	public void twoStep() throws ProcessingException {
+	public void twoStep() throws Exception {
 		handshake();
 		final String nonce = "1";
-		Message msg = handler.processInput("1", new ClientInformationMessage("12345", ECCKeyGen.create(), nonce));
+		final ECPublicKey publicKey = (ECPublicKey) ECCEncryption.createKeyPair().getPublic();
+		Message msg = handler.processInput("1", new ClientInformationMessage("12345", publicKey, nonce));
 		assertTrue(msg instanceof SessionMessage);
-		assertNotNull(((SessionMessage) msg).sessionKey);
 		assertEquals(nonce, ((SessionMessage) msg).nonce);
 	}
 }

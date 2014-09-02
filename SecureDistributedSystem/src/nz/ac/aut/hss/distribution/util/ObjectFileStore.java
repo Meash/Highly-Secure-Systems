@@ -32,9 +32,10 @@ public class ObjectFileStore {
 		List<String> lines = Files.readAllLines(path, ENCODING);
 		final int amountOfLines = lines.size();
 		if (amountOfLines == 0)
-			throw new IllegalStateException("File does not contain content");
+			throw new IllegalStateException("File '" + path + "' does not contain any content");
 		if (amountOfLines > 1)
-			throw new IllegalStateException("File should only contain one line, contains " + amountOfLines);
+			throw new IllegalStateException(
+					"File '" + path + "' should only contain one line, contains " + amountOfLines);
 		return serializer.deserialize(lines.get(0));
 	}
 }

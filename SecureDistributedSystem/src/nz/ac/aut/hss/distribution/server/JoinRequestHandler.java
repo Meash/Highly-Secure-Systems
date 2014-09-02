@@ -3,7 +3,7 @@ package nz.ac.aut.hss.distribution.server;
 import nz.ac.aut.hss.distribution.crypt.AES;
 import nz.ac.aut.hss.distribution.crypt.ECCEncryption;
 import nz.ac.aut.hss.distribution.protocol.*;
-import nz.ac.aut.hss.distribution.util.PasswordGenerator;
+import nz.ac.aut.hss.distribution.util.Base64Coder;
 
 import javax.crypto.SecretKey;
 
@@ -12,8 +12,7 @@ import javax.crypto.SecretKey;
  * @created 25.08.2014
  */
 public class JoinRequestHandler implements RequestHandler {
-	private static final int PASSWORD_MIN_LENGTH = 6, PASSWORD_MAX_LENGTH = 8;
-	private static final String ENCRYPTION = "AES";
+	private static final String CONVEY_CHARSET = AES.CHARSET;
 
 	private final KeyAuthority authority;
 
@@ -27,7 +26,7 @@ public class JoinRequestHandler implements RequestHandler {
 		try {
 			if (input instanceof JoinRequestMessage) {
 				final SecretKey key = AES.createKey(128);
-				final String password = new String(key.getEncoded(), AES.CHARSET);
+				final String password = new String(Base64Coder.encode(key.getEncoded()));
 				System.out.println(">> Convey this password confidentially: " + password);
 				return new SuppressedMessage();
 			} else if (input instanceof ClientInformationMessage) {
@@ -37,9 +36,7 @@ public class JoinRequestHandler implements RequestHandler {
 				if (clientMessage.publicKey == null)
 					return new ProtocolInvalidationMessage("No public key provided (null)");
 				authority.addClientPublicKey(clientMessage.telephoneNumber, clientMessage.publicKey);
-				final SecretKey sessionKey = PasswordGenerator.generateSecretKey(ENCRYPTION);
-				authority.addClientSessionKey(clientId, sessionKey);
-				return new SessionMessage(sessionKey, clientMessage.nonce, new ECCEncryption(null)); // TODO
+				return new SessionMessage(clientMessage.nonce, new ECCEncryption(null, clientMessage.publicKey));
 			} else {
 				throw new IllegalArgumentException("Invalid message " + input.getClass());
 			}
