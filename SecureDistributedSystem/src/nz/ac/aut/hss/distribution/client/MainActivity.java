@@ -1,4 +1,4 @@
-package nz.ac.aut.hss.distribution.client;
+package com.example.ecc;
 
 
 import java.io.BufferedReader;
@@ -7,6 +7,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,8 +26,8 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		if(doesFileExist()){
-			ECC = new EccKeyGen(readPrivateKey());
+		if(SaveLoadKeys.doesFileExist("public_key.txt") && SaveLoadKeys.doesFileExist("private_key.txt")){
+			ECC = new EccKeyGen(this);
 		} else {
 			ECC = new EccKeyGen();
 		}
@@ -38,40 +40,24 @@ public class MainActivity extends Activity {
 		return true;
 	}
 	
-	public boolean doesFileExist(){
-		File f = new File("data/data/com.example.ecc/files/private_key.txt");
-		if(f.exists()){
-			return true;
-		}
-		
-		return false;
-	}
-	
-	public String readPrivateKey(){
-		String key = "Not read";
-		try {
-			InputStream inputStream = openFileInput("private_key.txt");
-			if(inputStream != null){
-				InputStreamReader isr = new InputStreamReader(inputStream);
-				BufferedReader br = new BufferedReader(isr);
-				key = br.readLine();
-			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return key;	 	 
-	}
 	
 	public void keyGenAction(View view) {
-		ECC.savePrivateKey(this);
+		SaveLoadKeys.savePrivateKey(ECC.getPrivateKey(), this);
+		SaveLoadKeys.savePublicKey(ECC.getPublicKey(), this);
 	}
 	
 	public void getPrivateKey(View view){
-		showToast(readPrivateKey());
+		
+		try {
+			ECPublicKey pubk = SaveLoadKeys.readPublicKey(this);
+			ECPrivateKey prik = SaveLoadKeys.readPrivateKey(this);
+			showToast("Public key x:" + pubk.getW().getAffineX().toString() + "\n\n Public key y:" + pubk.getW().getAffineY().toString());
+			showToast("Private Key :" + prik.getS().toString());
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public void httpTest(View view) {
@@ -83,7 +69,7 @@ public class MainActivity extends Activity {
 	}
 	
 	public void fileTest(View view) {
-		showToast(this.getFilesDir().getAbsolutePath() + "\n" + doesFileExist());
+		showToast(SaveLoadKeys.doesFileExist("private_key.txt")+"");
 		
 	}
 	

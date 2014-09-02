@@ -1,4 +1,4 @@
-package nz.ac.aut.hss.distribution.client;
+package com.example.ecc;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

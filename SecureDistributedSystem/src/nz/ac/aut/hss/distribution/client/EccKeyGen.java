@@ -1,4 +1,4 @@
-package nz.ac.aut.hss.distribution.client;
+package com.example.ecc;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -65,7 +65,7 @@ public class EccKeyGen {
     
     private ECPublicKey publicKey;
     private ECPrivateKey privateKey;
-    private ECParameterSpec specs;
+    private static ECParameterSpec specs;
     
     public EccKeyGen(){
         try {
@@ -75,7 +75,6 @@ public class EccKeyGen {
             specs = new ECParameterSpec(curve, G, N, H);
             KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
             kpg.initialize(specs);
-            System.out.println("generating key");
             KeyPair keyPair = kpg.generateKeyPair();
             System.out.println("Finiched generating a key pair");
             publicKey = (ECPublicKey) keyPair.getPublic();
@@ -87,28 +86,15 @@ public class EccKeyGen {
         }
     }
     
-    public EccKeyGen(String privateKeyStr){
+    public EccKeyGen(Context context){
         try {
             ECField feild = new ECFieldFp(P);
             EllipticCurve curve = new EllipticCurve(feild, A, B);
             ECPoint G = new ECPoint(GX, GY);
             specs = new ECParameterSpec(curve, G, N, H);
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
-            kpg.initialize(specs);
-            System.out.println("generating key");
-            KeyPair keyPair = kpg.generateKeyPair();
-            System.out.println("Finiched generating a key pair");
-            publicKey = (ECPublicKey) keyPair.getPublic();
-            
-            //set privateKey
-            BigInteger keyint = new BigInteger(Base64.decode(privateKeyStr, Base64.DEFAULT));
-            KeyFactory kf = KeyFactory.getInstance("EC");
-            privateKey = (ECPrivateKey) kf.generatePrivate(new ECPrivateKeySpec(keyint, specs)); 
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(EccKeyGen.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidAlgorithmParameterException ex) {
-            Logger.getLogger(EccKeyGen.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidKeySpecException e) {
+            privateKey = (ECPrivateKey) SaveLoadKeys.readPrivateKey(context);
+            publicKey = (ECPublicKey) SaveLoadKeys.readPublicKey(context);
+        } catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -119,21 +105,12 @@ public class EccKeyGen {
         return publicKey;
     }
     
-    public boolean savePrivateKey(Context context){
-    	boolean toReturn = false;
-    	String data = Base64.encodeToString(privateKey.getS().toByteArray(), Base64.DEFAULT);
-    	FileOutputStream fos;
-    	try{
-    		toReturn = true;
-    		fos = context.openFileOutput("private_key.txt", 0);
-    		OutputStreamWriter osw = new OutputStreamWriter(fos);
-    		osw.write(data);
-    		Toast.makeText(context, "Key save to", Toast.LENGTH_LONG).show();
-    		osw.close();
-    	} catch (Exception e){
-    		Toast.makeText(context, "Cannot save private key", Toast.LENGTH_LONG).show();
-    	}
-    	return toReturn;
+    public ECPrivateKey getPrivateKey() {
+		return privateKey;
+	}
+    
+    public ECParameterSpec getSpecs(){
+    	return specs;
     }
     
     public BigInteger secretKeyGen(ECPublicKey otherPublicKey){
