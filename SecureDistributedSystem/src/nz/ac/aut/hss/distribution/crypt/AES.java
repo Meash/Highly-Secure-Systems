@@ -12,7 +12,7 @@ import java.security.NoSuchProviderException;
  * @author Martin Schrimpf
  * @created 27.08.2014
  */
-public class AES extends Encryption {
+public class AES implements Encryption {
 	private static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
 	private static final IvParameterSpec initVector =
 			new IvParameterSpec(new byte[]{1, -2, 3, -4, 5, -6, 7, -8, 9, -10, 11, -12, 13, -14, 15, -16});

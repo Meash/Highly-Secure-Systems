@@ -32,7 +32,7 @@ public class MessageEncrypter {
 		return new EncryptedMessage(result);
 	}
 
-	public Message decrypt(EncryptedMessage msg, final Encryption[] encryptions)
+	public Message decrypt(EncryptedMessage msg, final Encryption... encryptions)
 			throws CryptException, IOException, ClassNotFoundException {
 		String result = msg.content;
 		for (int i = encryptions.length - 1; i >= 0; i--) {

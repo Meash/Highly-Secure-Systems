@@ -10,6 +10,7 @@ import java.io.Serializable;
  * @created 25.08.2014
  */
 public abstract class Message implements Serializable {
+	public final String identifier;
 	/**
 	 * The encryptions that will be applied to the serialized version of this message. The first encryption in the
 	 * array will be applied first, the last one last
@@ -23,12 +24,8 @@ public abstract class Message implements Serializable {
 	@Nullable
 	public String authentication;
 
-	protected Message(final Encryption... encryptionIntructions) {
-		this(null, encryptionIntructions);
-	}
-
-	protected Message(final String authentication, final Encryption... encryptions) {
-		this.authentication = authentication;
+	protected Message(final String identifier, final Encryption... encryptions) {
+		this.identifier = identifier;
 		this.encryptions = encryptions;
 	}
 
@@ -37,8 +34,12 @@ public abstract class Message implements Serializable {
 	}
 
 	public void setEncryptions(final Encryption[] encryptions) {
-		if(encryptions == null)
+		if (encryptions == null)
 			throw new IllegalArgumentException("Encryptions must not be null, use zero-sized array instead");
 		this.encryptions = encryptions;
+	}
+
+	public void setAuthentication(final String authentication) {
+		this.authentication = authentication;
 	}
 }

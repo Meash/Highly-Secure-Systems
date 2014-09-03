@@ -7,8 +7,8 @@ import nz.ac.aut.hss.distribution.crypt.Encryption;
  * @created 31.08.2014
  */
 public class EncryptedMessage extends SimpleTextMessage {
-	public EncryptedMessage(final String content) {
-		super(content);
+	public EncryptedMessage(final String identifier, final String content) {
+		super(identifier, content);
 	}
 
 	@Override

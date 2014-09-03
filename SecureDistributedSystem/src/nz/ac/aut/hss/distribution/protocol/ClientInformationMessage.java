@@ -9,11 +9,12 @@ import java.security.interfaces.ECPublicKey;
  * @created 25.08.2014
  */
 public class ClientInformationMessage extends Message {
+	public static final String IDENTIFIER = "join_request_client_info";
 	public final String telephoneNumber, nonce;
 	public final ECPublicKey publicKey;
 
 	public ClientInformationMessage(final String telephoneNumber, final ECPublicKey publicKey, final String nonce, final Encryption... encryptions) {
-		super(encryptions);
+		super(IDENTIFIER, encryptions);
 		this.telephoneNumber = telephoneNumber;
 		this.publicKey = publicKey;
 		this.nonce = nonce;

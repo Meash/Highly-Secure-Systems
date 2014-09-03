@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  * @author Martin Schrimpf
  * @created 28.08.2014
  */
-public class ECCEncryption extends Encryption {
+public class ECCEncryption implements Encryption {
 	private static final BigInteger P
 			= new BigInteger("FFFFFFFF" + "00000001" + "00000000" + "00000000" +
 			"00000000" + "FFFFFFFF" + "FFFFFFFF" + "FFFFFFFF", 16);
@@ -133,8 +133,8 @@ public class ECCEncryption extends Encryption {
 
 	public static KeyPair createKeyPair() throws CryptException {
 		try {
-			final KeyPairGenerator kpg = KeyPairGenerator.getInstance(TRANSFORMATION, PROVIDER);
 			init();
+			final KeyPairGenerator kpg = KeyPairGenerator.getInstance(TRANSFORMATION, PROVIDER);
 			kpg.initialize(specs);
 			return kpg.genKeyPair();
 		} catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {

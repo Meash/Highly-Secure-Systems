@@ -1,10 +1,12 @@
 package nz.ac.aut.hss.distribution.crypt;
 
+import java.io.Serializable;
+
 /**
  * @author Martin Schrimpf
  * @created 28.08.2014
  */
-public abstract class Encryption {
+public interface Encryption extends Serializable {
 	public static final String CHARSET = "ISO-8859-1";
 
 	public abstract String encrypt(final String plain) throws CryptException;

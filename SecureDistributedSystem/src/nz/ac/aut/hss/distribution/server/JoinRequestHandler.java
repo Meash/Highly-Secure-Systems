@@ -12,7 +12,7 @@ import javax.crypto.SecretKey;
  * @created 25.08.2014
  */
 public class JoinRequestHandler implements RequestHandler {
-	private static final String CONVEY_CHARSET = AES.CHARSET;
+	public static final String CONVEY_MESSAGE = ">> Convey this password confidentially: ";
 
 	private final KeyAuthority authority;
 
@@ -26,8 +26,9 @@ public class JoinRequestHandler implements RequestHandler {
 		try {
 			if (input instanceof JoinRequestMessage) {
 				final SecretKey key = AES.createKey(128);
+				authority.putSessionKey(clientId, key);
 				final String password = new String(Base64Coder.encode(key.getEncoded()));
-				System.out.println(">> Convey this password confidentially: " + password);
+				System.out.println(CONVEY_MESSAGE + password);
 				return new SuppressedMessage();
 			} else if (input instanceof ClientInformationMessage) {
 				final ClientInformationMessage clientMessage = (ClientInformationMessage) input;
@@ -36,7 +37,7 @@ public class JoinRequestHandler implements RequestHandler {
 				if (clientMessage.publicKey == null)
 					return new ProtocolInvalidationMessage("No public key provided (null)");
 				authority.addClientPublicKey(clientMessage.telephoneNumber, clientMessage.publicKey);
-				return new SessionMessage(clientMessage.nonce, new ECCEncryption(null, clientMessage.publicKey));
+				return new JoinConfirmationMessage(clientMessage.nonce, new ECCEncryption(null, clientMessage.publicKey));
 			} else {
 				throw new IllegalArgumentException("Invalid message " + input.getClass());
 			}

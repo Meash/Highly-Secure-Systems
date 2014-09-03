@@ -5,7 +5,9 @@ package nz.ac.aut.hss.distribution.protocol;
  * @created 26.08.2014
  */
 public class ClientListRequestMessage extends SimpleTextMessage {
+	public static final String IDENTIFIER = "client_list_request";
+
 	public ClientListRequestMessage() {
-		super("Client list please");
+		super(IDENTIFIER, "Client list please");
 	}
 }

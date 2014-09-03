@@ -6,6 +6,7 @@ import nz.ac.aut.hss.distribution.protocol.*;
 import nz.ac.aut.hss.distribution.util.ObjectFileStore;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.net.ProtocolException;
 import java.nio.file.Files;
@@ -29,6 +30,8 @@ public class KeyAuthority {
 	private RequestHandler handler;
 	/** Phone -> public key */
 	private final Map<String, ECPublicKey> clientPublicKeys;
+	/** ID -> one-time-pass */
+	private final Map<String, SecretKey> clientSessionKeys;
 
 	public KeyAuthority() throws IOException, ClassNotFoundException {
 		requestAssignments.put(JoinRequestMessage.class, new JoinRequestHandler(this));
@@ -39,6 +42,7 @@ public class KeyAuthority {
 		messageEncrypter = new MessageEncrypter();
 		//noinspection unchecked
 		clientPublicKeys = loadMap(CLIENT_PUBLICKEY_FILE);
+		clientSessionKeys = new HashMap<>();
 	}
 
 	private Map loadMap(Path filePath) throws IOException, ClassNotFoundException {
@@ -61,7 +65,8 @@ public class KeyAuthority {
 	 */
 	public String processInput(final String clientId, final String inputLine) throws ProcessingException, IOException {
 		final Object inputObject = deserializeInput(inputLine);
-		final Message input = validateMessage(inputObject);
+		Message input = validateMessage(inputObject);
+
 
 		if (handler == null) {
 			handler = requestAssignments.get(input.getClass());
@@ -111,5 +116,9 @@ public class KeyAuthority {
 
 	public void addClientPublicKey(final String phone, final ECPublicKey publicKey) {
 		clientPublicKeys.put(phone, publicKey);
+	}
+
+	public void putSessionKey(final String id, final SecretKey key) {
+		clientSessionKeys.put(id, key);
 	}
 }

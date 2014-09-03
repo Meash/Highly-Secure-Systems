@@ -7,10 +7,11 @@ import nz.ac.aut.hss.distribution.crypt.Encryption;
  * @created 26.08.2014
  */
 public class ProtocolInvalidationMessage extends Message {
+	public static final String IDENTIFIER = "protocol_invalidation";
 	public final String message;
 
 	public ProtocolInvalidationMessage(final String message, final Encryption... encryptions) {
-		super(encryptions);
+		super(IDENTIFIER, encryptions);
 		this.message = message;
 	}
 }

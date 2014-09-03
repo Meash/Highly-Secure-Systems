@@ -38,7 +38,7 @@ public class JoinRequestHandlerTest {
 		final String nonce = "1";
 		final ECPublicKey publicKey = (ECPublicKey) ECCEncryption.createKeyPair().getPublic();
 		Message msg = handler.processInput("1", new ClientInformationMessage("12345", publicKey, nonce));
-		assertTrue(msg instanceof SessionMessage);
-		assertEquals(nonce, ((SessionMessage) msg).nonce);
+		assertTrue(msg instanceof JoinConfirmationMessage);
+		assertEquals(nonce, ((JoinConfirmationMessage) msg).nonce);
 	}
 }
