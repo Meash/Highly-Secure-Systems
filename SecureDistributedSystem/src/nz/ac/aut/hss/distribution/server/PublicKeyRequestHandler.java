@@ -1,9 +1,9 @@
 package nz.ac.aut.hss.distribution.server;
 
 import nz.ac.aut.hss.distribution.protocol.ClientDoesNotExistMessage;
+import nz.ac.aut.hss.distribution.protocol.ClientPublicKeyMessage;
 import nz.ac.aut.hss.distribution.protocol.Message;
 import nz.ac.aut.hss.distribution.protocol.ProtocolInvalidationMessage;
-import nz.ac.aut.hss.distribution.protocol.PublicKeyMessage;
 
 import java.security.PublicKey;
 import java.util.Map;
@@ -21,15 +21,15 @@ public class PublicKeyRequestHandler implements RequestHandler {
 
 	@Override
 	public Message processInput(final String clientId, final Message input) {
-		if (!(input instanceof PublicKeyMessage))
+		if (!(input instanceof ClientPublicKeyMessage))
 			return new ProtocolInvalidationMessage(
-					"Expected message of class " + PublicKeyMessage.class.getName() + ", got " +
+					"Expected message of class " + ClientPublicKeyMessage.class.getName() + ", got " +
 							input.getClass().getName());
-		final PublicKeyMessage request = (PublicKeyMessage) input;
+		final ClientPublicKeyMessage request = (ClientPublicKeyMessage) input;
 		final Map<String, PublicKey> phonePublicKey = authority.getClientPublicKeys();
 		final PublicKey publicKey = phonePublicKey.get(request.phone);
 		if(publicKey == null)
 			return new ClientDoesNotExistMessage(request.phone);
-		return new PublicKeyMessage(request.phone, publicKey);
+		return new ClientPublicKeyMessage(request.phone, publicKey);
 	}
 }

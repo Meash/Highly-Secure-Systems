@@ -2,8 +2,8 @@ package nz.ac.aut.hss.server;
 
 import nz.ac.aut.hss.distribution.crypt.ECCEncryption;
 import nz.ac.aut.hss.distribution.protocol.ClientDoesNotExistMessage;
+import nz.ac.aut.hss.distribution.protocol.ClientPublicKeyMessage;
 import nz.ac.aut.hss.distribution.protocol.Message;
-import nz.ac.aut.hss.distribution.protocol.PublicKeyMessage;
 import nz.ac.aut.hss.distribution.server.KeyAuthority;
 import nz.ac.aut.hss.distribution.server.PublicKeyRequestHandler;
 import org.junit.Before;
@@ -31,7 +31,7 @@ public class PublicKeyRequestHandlerTest {
 	@Test
 	public void clientDoesNotExist() {
 		final String phone = "123456";
-		Message msg = handler.processInput("1", new PublicKeyMessage(phone, null));
+		Message msg = handler.processInput("1", new ClientPublicKeyMessage(phone, null));
 		assertTrue(msg instanceof ClientDoesNotExistMessage);
 	}
 
@@ -40,9 +40,9 @@ public class PublicKeyRequestHandlerTest {
 		final String phone = "123456";
 		final ECPublicKey publicKey = (ECPublicKey) ECCEncryption.createKeyPair().getPublic();
 		authority.addClientPublicKey(phone, publicKey);
-		Message msg = handler.processInput("1", new PublicKeyMessage(phone, null));
-		assertTrue(msg instanceof PublicKeyMessage);
-		assertEquals(phone, ((PublicKeyMessage) msg).phone);
-		assertNotNull(((PublicKeyMessage) msg).publicKey);
+		Message msg = handler.processInput("1", new ClientPublicKeyMessage(phone, null));
+		assertTrue(msg instanceof ClientPublicKeyMessage);
+		assertEquals(phone, ((ClientPublicKeyMessage) msg).phone);
+		assertNotNull(((ClientPublicKeyMessage) msg).publicKey);
 	}
 }
