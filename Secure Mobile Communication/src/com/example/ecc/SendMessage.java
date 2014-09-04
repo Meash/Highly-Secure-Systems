@@ -29,7 +29,6 @@ public class SendMessage extends Activity{
 		CheckBox confCheck = (CheckBox) findViewById(R.id.checkbox_conf_send);
 		String messageBody = messageBodyText.getText().toString();
 		String authConf = "";
-		
 		if(authCheck.isChecked()){
 			authConf += "auth";
 		}
@@ -37,21 +36,8 @@ public class SendMessage extends Activity{
 			authConf += "conf";
 		}
 		
-		if(!authConf.equals("")){
-			messageBody = authConf + "\n" + messageBody;
-		}
-		
-		
-		Toast.makeText(this, messageBody, Toast.LENGTH_LONG).show();
-		PendingIntent sentPendingIntent = PendingIntent.getBroadcast
-            (this, 0, new Intent("SMS_SENT"), 0);
-		PendingIntent deliveredPendingIntent
-	            = PendingIntent.getBroadcast
-            (this, 0, new Intent("SMS_DELIVERED"), 0);
-		
-		SmsManager smsManager = SmsManager.getDefault();
-		smsManager.sendTextMessage("5555", null, messageBody, 
-				sentPendingIntent, deliveredPendingIntent);
+		SmsSender sender = new SmsSender("02040527278", messageBody, this);
+		sender.sendMessage();
 		
 		
 	}
