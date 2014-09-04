@@ -10,6 +10,7 @@ import java.io.Serializable;
  * @created 25.08.2014
  */
 public abstract class Message implements Serializable {
+	public static final int NONCE_LENGTH = 10;
 	public final String identifier;
 	/**
 	 * The encryptions that will be applied to the serialized version of this message. The first encryption in the
