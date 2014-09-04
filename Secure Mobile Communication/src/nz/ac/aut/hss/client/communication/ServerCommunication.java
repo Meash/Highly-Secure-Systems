@@ -7,12 +7,10 @@ import nz.ac.aut.hss.distribution.crypt.Encryption;
 import nz.ac.aut.hss.distribution.protocol.*;
 import nz.ac.aut.hss.distribution.util.Base64Coder;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
-
 import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,7 +27,6 @@ import java.util.Map;
  * @created 03.09.2014
  */
 public class ServerCommunication {
-	private static final int NONCE_LENGTH = 10;
 	private final Socket sock;
 	private final BufferedReader in;
 	private final PrintWriter out;
@@ -55,20 +52,20 @@ public class ServerCommunication {
 	}
 
 	public void requestJoin() throws CommunicationException {
-
+		try {
 			/* step 1/2: initial request */
-			try {
-				send(new JoinRequestMessage());
-			
+			send(new JoinRequestMessage());
+
 
 			/* step 2/2: confirm one-time password, send client info */
 			final String oneTimePassword = app.getOneTimePassword();
 			final byte[] keyBytes = Base64Coder.decodeString(oneTimePassword).getBytes(Encryption.CHARSET);
 			final SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
+			messageEncrypter.setSessionKey(secretKeySpec);
 			final AES encryption = new AES(secretKeySpec);
 
 			final PublicKey publicKey = keyPair.getPublic();
-			final String nonce = RandomStringUtils.randomAlphanumeric(NONCE_LENGTH);
+			final String nonce = RandomStringUtils.randomAlphanumeric(Message.NONCE_LENGTH);
 			final ClientInformationMessage clientInfoMsg =
 					new ClientInformationMessage(phoneNumber, publicKey, nonce, encryption);
 			send(clientInfoMsg);
@@ -78,27 +75,14 @@ public class ServerCommunication {
 				throw new CommunicationException(
 						"Invalid reply to request - expected EncryptedMessage, got " + msgObj.getClass().getName());
 			}
-			final Message msg = messageEncrypter.decrypt((Message) msgObj, phoneNumber);
+			final Message msg = messageEncrypter.decrypt((Message) msgObj);
 			if (!(msg instanceof JoinConfirmationMessage))
 				throw new CommunicationException("Expected join confirmation, got " + msg.getClass().getName());
 			if (!((JoinConfirmationMessage) msg).nonce.equals(nonce))
 				throw new CommunicationException("Invalid nonce reply");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchPaddingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CryptException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		} catch (IOException | NoSuchPaddingException | NoSuchAlgorithmException | ClassNotFoundException | CryptException e) {
+			throw new CommunicationException(e);
+		}
 	}
 
 	/**

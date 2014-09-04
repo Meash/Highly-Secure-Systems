@@ -7,8 +7,6 @@ import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Martin Schrimpf
@@ -16,16 +14,19 @@ import java.util.Map;
  */
 public class ClientMessageEncrypter extends MessageEncrypter {
 	private final PrivateKey privateKey;
-	private final Map<String, SecretKey> clientSessionKeys;
+	private SecretKey sessionKey;
 
 	public ClientMessageEncrypter(final PrivateKey privateKey) {
 		if (privateKey == null)
 			throw new IllegalArgumentException("private key is null");
 		this.privateKey = privateKey;
-		this.clientSessionKeys = new HashMap<>();
 	}
 
-	public Message decrypt(final Message input, final String phone)
+	public void setSessionKey(final SecretKey sessionKey) {
+		this.sessionKey = sessionKey;
+	}
+
+	public Message decrypt(final Message input)
 			throws IOException, CryptException, ClassNotFoundException {
 		if (!(input instanceof EncryptedMessage))
 			return input;
@@ -37,9 +38,8 @@ public class ClientMessageEncrypter extends MessageEncrypter {
 				encryptions = new Encryption[]{new RSA(privateKey, null)};
 				break;
 			case CommunicationConfirmationMessage.IDENTIFIER:
-				final SecretKey sessionKey = clientSessionKeys.get(phone);
 				if (sessionKey == null)
-					throw new IllegalStateException("Session key for phone '" + phone + "' has not been set");
+					throw new IllegalStateException("sessionKey has not been set");
 				try {
 					encryptions = new Encryption[]{new AES(sessionKey)};
 				} catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
@@ -50,9 +50,5 @@ public class ClientMessageEncrypter extends MessageEncrypter {
 				throw new IllegalArgumentException("Unsupported identifier '" + input.identifier + "'");
 		}
 		return decrypt((EncryptedMessage) input, encryptions);
-	}
-
-	public void putSessionKey(final String phone, final SecretKey key) {
-		this.clientSessionKeys.put(phone, key);
 	}
 }
