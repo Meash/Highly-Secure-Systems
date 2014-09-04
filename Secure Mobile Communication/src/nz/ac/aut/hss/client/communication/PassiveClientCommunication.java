@@ -36,9 +36,10 @@ public class PassiveClientCommunication extends ClientCommunication {
 	public boolean isMessageAuthentic(final Message message) {
 		return true;
 	}
-
+	
 	@Override
-	public void receive(final String textContent) {
-
+	public void receive(String phone, String textContent) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -3,6 +3,7 @@ package nz.ac.aut.hss.client.communication;
 import nz.ac.aut.hss.distribution.protocol.Message;
 
 import javax.crypto.SecretKey;
+
 import java.security.PrivateKey;
 
 /**
@@ -49,7 +50,8 @@ public class ActiveClientCommunication extends ClientCommunication {
 	}
 
 	@Override
-	public void receive(final String textContent) {
-
+	public void receive(String phone, String textContent) {
+		// TODO Auto-generated method stub
+		
 	}
 }

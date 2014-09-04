@@ -7,10 +7,12 @@ import nz.ac.aut.hss.distribution.crypt.Encryption;
 import nz.ac.aut.hss.distribution.protocol.*;
 import nz.ac.aut.hss.distribution.util.Base64Coder;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
+
 import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -53,9 +55,11 @@ public class ServerCommunication {
 	}
 
 	public void requestJoin() throws CommunicationException {
-		try {
+
 			/* step 1/2: initial request */
-			send(new JoinRequestMessage());
+			try {
+				send(new JoinRequestMessage());
+			
 
 			/* step 2/2: confirm one-time password, send client info */
 			final String oneTimePassword = app.getOneTimePassword();
@@ -79,9 +83,22 @@ public class ServerCommunication {
 				throw new CommunicationException("Expected join confirmation, got " + msg.getClass().getName());
 			if (!((JoinConfirmationMessage) msg).nonce.equals(nonce))
 				throw new CommunicationException("Invalid nonce reply");
-		} catch (IOException | NoSuchPaddingException | ClassNotFoundException | NoSuchAlgorithmException | CryptException e) {
-			throw new CommunicationException(e);
-		}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NoSuchPaddingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (CryptException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 
 	/**
@@ -94,9 +111,13 @@ public class ServerCommunication {
 			if (!(msgObj instanceof ClientListMessage))
 				throw new CommunicationException("Expected client list message, got " + msgObj.getClass().getName());
 			return ((ClientListMessage) msgObj).phonePublicKey;
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (ClassNotFoundException e) {
 			throw new CommunicationException("Could not retrieve list", e);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		return null;
 	}
 
 	/**
@@ -116,9 +137,13 @@ public class ServerCommunication {
 						"Expected client public key or client does not exist message, got " +
 								msgObj.getClass().getName());
 			return ((ClientPublicKeyMessage) msgObj).publicKey;
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (ClassNotFoundException e) {
 			throw new CommunicationException("Could not retrieve list", e);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		return null;
 	}
 
 	public void close() {

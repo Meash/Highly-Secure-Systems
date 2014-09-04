@@ -26,6 +26,7 @@
          </RelativeLayout>
          
         <EditText
+            android:id="@+id/messageBody"
     		android:inputType="textMultiLine" 
     		android:lines="8" 
     		android:minLines="6" 
@@ -53,6 +54,7 @@
         android:layout_width="170dp"
         android:layout_height="45dp"
         android:text="@string/send" 
+        android:onClick="onSend"
         />
     
 	</LinearLayout>

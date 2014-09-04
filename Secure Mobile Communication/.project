@@ -3,6 +3,7 @@
 	<name>ECC</name>
 	<comment></comment>
 	<projects>
+		<project>SecureDistributedSystem</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
