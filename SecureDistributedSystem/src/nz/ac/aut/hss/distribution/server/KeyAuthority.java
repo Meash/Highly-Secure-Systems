@@ -37,7 +37,7 @@ public class KeyAuthority {
 	public KeyAuthority() throws IOException, ClassNotFoundException {
 		requestAssignments.put(JoinRequestMessage.IDENTIFIER, new JoinRequestHandler(this));
 		requestAssignments.put(ClientListRequestMessage.IDENTIFIER, new ClientListRequestHandler(this));
-		requestAssignments.put(PublicKeyMessage.IDENTIFIER, new PublicKeyRequestHandler(this));
+		requestAssignments.put(ClientPublicKeyMessage.IDENTIFIER, new PublicKeyRequestHandler(this));
 
 		serializer = new ObjectSerializer();
 		messageEncrypter = new ServerMessageEncrypter(this);
