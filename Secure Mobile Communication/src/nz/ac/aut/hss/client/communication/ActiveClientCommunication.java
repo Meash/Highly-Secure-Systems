@@ -6,8 +6,7 @@ import javax.crypto.SecretKey;
 import java.security.PrivateKey;
 
 /**
- * One client communication serves as the intermediary between this app and one other client.
- * For multiple clients, multiple client communications are needed.
+ * Client communication that initializes the communication with another client
  * @author Martin Schrimpf
  * @created 03.09.2014
  */

@@ -6,6 +6,11 @@ package nz.ac.aut.hss.client.communication;
  */
 public interface SMSReceiver {
 	/**
+	 * Adds a listener that listens to <b>all</b> incoming SMS.
+	 * @param listener the listener
+	 */
+	public void addListener(SMSListener listener);
+	/**
 	 * @param phoneNumber the phone number this listener is listening to
 	 * @param listener    the listener
 	 */
