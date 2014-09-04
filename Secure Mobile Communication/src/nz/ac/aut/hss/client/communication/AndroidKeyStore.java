@@ -27,13 +27,8 @@ public class AndroidKeyStore implements KeyStore {
 			throws KeyStoreException {
 		if (new File(KEY_FILE).exists()) {
 			try {
-				try {
-					return loadKeyPair();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			} catch ( ClassNotFoundException e) {
+				return loadKeyPair();
+			} catch (ClassNotFoundException | IOException e) {
 				throw new KeyStoreException("Could not load key pair", e);
 			}
 		} else {
@@ -45,7 +40,6 @@ public class AndroidKeyStore implements KeyStore {
 				throw new KeyStoreException("Could not create key pair", e);
 			}
 		}
-		return null;
 	}
 
 	private KeyPair loadKeyPair() throws IOException, ClassNotFoundException {

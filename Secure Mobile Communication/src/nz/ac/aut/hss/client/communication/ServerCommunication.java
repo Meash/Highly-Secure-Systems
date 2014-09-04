@@ -95,13 +95,9 @@ public class ServerCommunication {
 			if (!(msgObj instanceof ClientListMessage))
 				throw new CommunicationException("Expected client list message, got " + msgObj.getClass().getName());
 			return ((ClientListMessage) msgObj).phonePublicKey;
-		} catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException | IOException e) {
 			throw new CommunicationException("Could not retrieve list", e);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		return null;
 	}
 
 	/**
@@ -121,13 +117,9 @@ public class ServerCommunication {
 						"Expected client public key or client does not exist message, got " +
 								msgObj.getClass().getName());
 			return ((ClientPublicKeyMessage) msgObj).publicKey;
-		} catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException | IOException e) {
 			throw new CommunicationException("Could not retrieve list", e);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		return null;
 	}
 
 	public void close() {
