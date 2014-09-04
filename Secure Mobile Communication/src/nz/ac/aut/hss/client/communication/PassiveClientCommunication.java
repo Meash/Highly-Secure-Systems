@@ -1,8 +1,8 @@
 package nz.ac.aut.hss.client.communication;
 
-import nz.ac.aut.hss.distribution.protocol.Message;
-
 import java.security.PrivateKey;
+
+import android.os.Message;
 
 /**
  * One client communication serves as the intermediary between this app and one other client.

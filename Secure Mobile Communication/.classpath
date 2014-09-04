@@ -5,8 +5,7 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/SecureDistributedSystem"/>
-	<classpathentry kind="lib" path="/SecureDistributedSystem/lib/jsr305-3.0.0.jar"/>
-	<classpathentry kind="lib" path="/SecureDistributedSystem/lib/bcprov-jdk15on-151.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/HssServer"/>
+	<classpathentry kind="lib" path="/HssServer/lib/commons-lang3-3.3.2.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

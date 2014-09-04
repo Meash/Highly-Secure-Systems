@@ -3,7 +3,7 @@
 	<name>ECC</name>
 	<comment></comment>
 	<projects>
-		<project>SecureDistributedSystem</project>
+		<project>HssServer</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
