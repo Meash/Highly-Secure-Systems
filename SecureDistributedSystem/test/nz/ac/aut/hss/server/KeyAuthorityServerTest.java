@@ -3,7 +3,7 @@ package nz.ac.aut.hss.server;
 import nz.ac.aut.hss.distribution.crypt.AES;
 import nz.ac.aut.hss.distribution.crypt.ECCEncryption;
 import nz.ac.aut.hss.distribution.crypt.Encryption;
-import nz.ac.aut.hss.distribution.crypt.MessageEncrypter;
+import nz.ac.aut.hss.distribution.crypt.ServerMessageEncrypter;
 import nz.ac.aut.hss.distribution.protocol.ClientInformationMessage;
 import nz.ac.aut.hss.distribution.protocol.EncryptedMessage;
 import nz.ac.aut.hss.distribution.protocol.JoinConfirmationMessage;
@@ -32,14 +32,12 @@ import static org.junit.Assert.assertEquals;
 public class KeyAuthorityServerTest {
 	private KeyAuthorityServer server;
 	private ObjectSerializer serializer;
-	private MessageEncrypter messageEncrypter;
 	private final int port = 61001;
 
 	@Before
 	public void setUp() throws IOException, ClassNotFoundException {
 		server = new KeyAuthorityServer(port);
 		serializer = new ObjectSerializer();
-		messageEncrypter = new MessageEncrypter();
 	}
 
 	@Test
@@ -61,7 +59,7 @@ public class KeyAuthorityServerTest {
 				/* step 2/2: confirm one-time password, send client info */
 				Thread.sleep(500); // wait for other process
 				System.out.flush();
-				System.setOut(old); // put things back
+				System.setOut(old); // restore console output
 				final String consoleInput = baos.toString();
 				final String oneTimePassword = consoleInput.substring(JoinRequestHandler.CONVEY_MESSAGE.length(),
 						consoleInput.length() - 2);
@@ -81,6 +79,7 @@ public class KeyAuthorityServerTest {
 				final String line = in.readLine();
 				Object msgObj = serializer.deserialize(line);
 				assertEquals(EncryptedMessage.class, msgObj.getClass());
+				final ServerMessageEncrypter messageEncrypter = server.getKeyAuthority().getMessageEncrypter();
 				msgObj = messageEncrypter.decrypt(((EncryptedMessage) msgObj), new ECCEncryption(privateKey, null));
 				assertEquals(JoinConfirmationMessage.class, msgObj.getClass());
 				assertEquals(nonce, ((JoinConfirmationMessage) msgObj).nonce);

@@ -29,7 +29,7 @@ public class MessageEncrypter {
 		for (final Encryption encryption : encryptions) {
 			result = encryption.encrypt(result);
 		}
-		return new EncryptedMessage(result);
+		return new EncryptedMessage(msg.identifier, result);
 	}
 
 	public Message decrypt(EncryptedMessage msg, final Encryption... encryptions)

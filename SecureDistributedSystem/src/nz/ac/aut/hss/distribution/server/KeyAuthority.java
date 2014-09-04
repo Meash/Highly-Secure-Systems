@@ -1,7 +1,7 @@
 package nz.ac.aut.hss.distribution.server;
 
 import nz.ac.aut.hss.distribution.crypt.CryptException;
-import nz.ac.aut.hss.distribution.crypt.MessageEncrypter;
+import nz.ac.aut.hss.distribution.crypt.ServerMessageEncrypter;
 import nz.ac.aut.hss.distribution.protocol.*;
 import nz.ac.aut.hss.distribution.util.ObjectFileStore;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
@@ -12,7 +12,7 @@ import java.net.ProtocolException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.interfaces.ECPublicKey;
+import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,23 +23,24 @@ import java.util.Map;
 public class KeyAuthority {
 	private static final Path CLIENT_PUBLICKEY_FILE = Paths.get("clients-publickeys.obj");
 
-	private final Map<Class<? extends Message>, RequestHandler> requestAssignments = new HashMap<>();
+	/** identifier -> handler */
+	private final Map<String, RequestHandler> requestAssignments = new HashMap<>();
 
 	private final ObjectSerializer serializer;
-	private final MessageEncrypter messageEncrypter;
+	private final ServerMessageEncrypter messageEncrypter;
 	private RequestHandler handler;
 	/** Phone -> public key */
-	private final Map<String, ECPublicKey> clientPublicKeys;
+	private final Map<String, PublicKey> clientPublicKeys;
 	/** ID -> one-time-pass */
 	private final Map<String, SecretKey> clientSessionKeys;
 
 	public KeyAuthority() throws IOException, ClassNotFoundException {
-		requestAssignments.put(JoinRequestMessage.class, new JoinRequestHandler(this));
-		requestAssignments.put(ClientListRequestMessage.class, new ClientListRequestHandler(this));
-		requestAssignments.put(PublicKeyMessage.class, new PublicKeyRequestHandler(this));
+		requestAssignments.put(JoinRequestMessage.IDENTIFIER, new JoinRequestHandler(this));
+		requestAssignments.put(ClientListRequestMessage.IDENTIFIER, new ClientListRequestHandler(this));
+		requestAssignments.put(PublicKeyMessage.IDENTIFIER, new PublicKeyRequestHandler(this));
 
 		serializer = new ObjectSerializer();
-		messageEncrypter = new MessageEncrypter();
+		messageEncrypter = new ServerMessageEncrypter(this);
 		//noinspection unchecked
 		clientPublicKeys = loadMap(CLIENT_PUBLICKEY_FILE);
 		clientSessionKeys = new HashMap<>();
@@ -63,13 +64,14 @@ public class KeyAuthority {
 	 * @param inputLine the input line
 	 * @return the string output or an empty string for no response or null to terminate the connection
 	 */
-	public String processInput(final String clientId, final String inputLine) throws ProcessingException, IOException {
+	public String processInput(final String clientId, final String inputLine)
+			throws ProcessingException, IOException, CryptException, ClassNotFoundException {
 		final Object inputObject = deserializeInput(inputLine);
 		Message input = validateMessage(inputObject);
-
+		input = messageEncrypter.decrypt(input, clientId);
 
 		if (handler == null) {
-			handler = requestAssignments.get(input.getClass());
+			handler = requestAssignments.get(input.identifier);
 		}
 		Message outputMessage = handler.processInput(clientId, input);
 
@@ -110,15 +112,27 @@ public class KeyAuthority {
 		new ObjectFileStore(CLIENT_PUBLICKEY_FILE).store(clientPublicKeys);
 	}
 
-	public Map<String, ECPublicKey> getClientPublicKeys() {
+	public Map<String, PublicKey> getClientPublicKeys() {
 		return clientPublicKeys;
 	}
 
-	public void addClientPublicKey(final String phone, final ECPublicKey publicKey) {
+	public void addClientPublicKey(final String phone, final PublicKey publicKey) {
 		clientPublicKeys.put(phone, publicKey);
 	}
 
 	public void putSessionKey(final String id, final SecretKey key) {
 		clientSessionKeys.put(id, key);
+	}
+
+	public SecretKey getOneTimePass(final String clientId) {
+		return clientSessionKeys.get(clientId);
+	}
+
+	public PublicKey getPublicKey(final String phone) {
+		return clientPublicKeys.get(phone);
+	}
+
+	public ServerMessageEncrypter getMessageEncrypter() {
+		return messageEncrypter;
 	}
 }

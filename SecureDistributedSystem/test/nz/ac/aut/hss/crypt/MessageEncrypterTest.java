@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
  * @created 31.08.2014
  */
 public class MessageEncrypterTest {
+	private static final String IDENTIFIER = "test_identifier";
 	private MessageEncrypter encrypter;
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
@@ -32,20 +33,20 @@ public class MessageEncrypterTest {
 
 	@Test
 	public void plainTextReverse() throws CryptException, IOException, ClassNotFoundException {
-		final Message source = new SimpleTextMessage("some text 123!");
+		final Message source = new SimpleTextMessage(IDENTIFIER, "some text 123!");
 		testReverse(source);
 	}
 
 	@Test
 	public void base64TextReverse() throws CryptException, IOException, ClassNotFoundException {
-		final Message source = new SimpleTextMessage("some text 123!", new Base64Encryption());
+		final Message source = new SimpleTextMessage(IDENTIFIER, "some text 123!", new Base64Encryption());
 		testReverse(source);
 	}
 
 	@Test
 	public void aesTextReverse() throws CryptException, IOException, ClassNotFoundException, NoSuchProviderException,
 			NoSuchAlgorithmException, NoSuchPaddingException {
-		final Message source = new SimpleTextMessage("some text 123!", new AES(AES.createKey(128)));
+		final Message source = new SimpleTextMessage(IDENTIFIER, "some text 123!", new AES(AES.createKey(128)));
 		testReverse(source);
 	}
 
@@ -54,13 +55,13 @@ public class MessageEncrypterTest {
 			throws CryptException, IOException, ClassNotFoundException, NoSuchProviderException,
 			NoSuchAlgorithmException, NoSuchPaddingException {
 		final Message source =
-				new SimpleTextMessage("some text 123!", new Base64Encryption(), new AES(AES.createKey(128)));
+				new SimpleTextMessage(IDENTIFIER, "some text 123!", new Base64Encryption(), new AES(AES.createKey(128)));
 		testReverse(source);
 	}
 
 	@Test
 	public void noEncryptionsInEncryptedMessage() {
-		final EncryptedMessage msg = new EncryptedMessage("123");
+		final EncryptedMessage msg = new EncryptedMessage(IDENTIFIER, "123");
 		expectedException.expect(UnsupportedOperationException.class);
 		msg.getEncryptions();
 	}

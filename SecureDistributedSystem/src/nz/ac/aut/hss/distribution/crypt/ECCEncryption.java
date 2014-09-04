@@ -6,7 +6,6 @@ import javax.crypto.*;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.*;
-import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.*;
 import java.util.logging.Level;
@@ -50,8 +49,8 @@ public class ECCEncryption implements Encryption {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
-	private final ECPublicKey publicKey;
-	private final ECPrivateKey privateKey;
+	private final Key key2;
+	private final Key key1;
 	private static ECParameterSpec specs;
 
 	public ECCEncryption() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException,
@@ -61,15 +60,15 @@ public class ECCEncryption implements Encryption {
 		kpg.initialize(specs);
 		KeyPair keyPair = kpg.generateKeyPair();
 		System.out.println("Finished generating a key pair");
-		this.publicKey = (ECPublicKey) keyPair.getPublic();
-		this.privateKey = (ECPrivateKey) keyPair.getPrivate();
+		this.key2 = keyPair.getPublic();
+		this.key1 = keyPair.getPrivate();
 	}
 
-	public ECCEncryption(ECPrivateKey privateKey, ECPublicKey publicKey)
+	public ECCEncryption(Key key1, Key key2)
 			throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException {
 		init();
-		this.privateKey = privateKey;
-		this.publicKey = publicKey;
+		this.key1 = key1;
+		this.key2 = key2;
 	}
 
 	private static void init() throws NoSuchProviderException {
@@ -98,7 +97,9 @@ public class ECCEncryption implements Encryption {
 	private String convert(final String input, final int mode) throws CryptException {
 		try {
 			final Cipher cipher = Cipher.getInstance(TRANSFORMATION, PROVIDER);
-			final Key key = mode == Cipher.ENCRYPT_MODE ? privateKey : publicKey;
+			final Key key = mode == Cipher.ENCRYPT_MODE ? key1 : key2;
+			if (key == null)
+				throw new IllegalStateException("Key is null");
 			cipher.init(mode, key);
 			final byte[] bytes = input.getBytes(Encryption.CHARSET);
 			final byte[] result = cipher.doFinal(bytes);
@@ -114,7 +115,7 @@ public class ECCEncryption implements Encryption {
 		BigInteger key = null;
 		try {
 			KeyAgreement ka = KeyAgreement.getInstance(TRANSFORMATION);
-			ka.init(privateKey);
+			ka.init(key1);
 			ka.doPhase(otherPublicKey, true);
 			key = new BigInteger(ka.generateSecret());
 		} catch (InvalidKeyException | NoSuchAlgorithmException ex) {
@@ -123,12 +124,12 @@ public class ECCEncryption implements Encryption {
 		return key;
 	}
 
-	public ECPublicKey getPublicKey() {
-		return publicKey;
+	public Key getKey2() {
+		return key2;
 	}
 
-	public ECPrivateKey getPrivateKey() {
-		return privateKey;
+	public Key getKey1() {
+		return key1;
 	}
 
 	public static KeyPair createKeyPair() throws CryptException {

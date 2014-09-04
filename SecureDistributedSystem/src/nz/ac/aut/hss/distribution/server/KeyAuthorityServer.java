@@ -55,4 +55,8 @@ public class KeyAuthorityServer extends Thread {
 			}
 		}
 	}
+
+	public KeyAuthority getKeyAuthority() {
+		return keyAuthority;
+	}
 }

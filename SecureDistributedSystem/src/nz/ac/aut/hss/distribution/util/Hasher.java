@@ -1,5 +1,7 @@
 package nz.ac.aut.hss.distribution.util;
 
+import nz.ac.aut.hss.distribution.crypt.Encryption;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -16,8 +18,8 @@ public class Hasher {
 	}
 
 	public String hash(final String str) throws UnsupportedEncodingException {
-		byte[] hash = digest.digest(str.getBytes("UTF-8"));
-		return new String(hash);
+		byte[] hash = digest.digest(str.getBytes(Encryption.CHARSET));
+		return new String(hash, Encryption.CHARSET);
 	}
 
 	public boolean matchesHash(final String source, final String hash) throws UnsupportedEncodingException {

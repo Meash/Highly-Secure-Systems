@@ -2,7 +2,7 @@ package nz.ac.aut.hss.distribution.protocol;
 
 import nz.ac.aut.hss.distribution.crypt.Encryption;
 
-import java.security.interfaces.ECPublicKey;
+import java.security.PublicKey;
 import java.util.Map;
 
 /**
@@ -13,9 +13,9 @@ public class ClientListMessage extends Message {
 	public static final String IDENTIFIER = "client_list";
 
 	/** the client list (null for a request) */
-	public final Map<String, ECPublicKey> phonePublicKey;
+	public final Map<String, PublicKey> phonePublicKey;
 
-	public ClientListMessage(final Map<String, ECPublicKey> phonePublicKey, final Encryption... encryptions) {
+	public ClientListMessage(final Map<String, PublicKey> phonePublicKey, final Encryption... encryptions) {
 		super(IDENTIFIER, encryptions);
 		this.phonePublicKey = phonePublicKey;
 	}

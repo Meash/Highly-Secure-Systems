@@ -2,7 +2,7 @@ package nz.ac.aut.hss.distribution.protocol;
 
 import nz.ac.aut.hss.distribution.crypt.Encryption;
 
-import java.security.interfaces.ECPublicKey;
+import java.security.PublicKey;
 
 /**
  * @author Martin Schrimpf
@@ -11,9 +11,9 @@ import java.security.interfaces.ECPublicKey;
 public class ClientInformationMessage extends Message {
 	public static final String IDENTIFIER = "join_request_client_info";
 	public final String telephoneNumber, nonce;
-	public final ECPublicKey publicKey;
+	public final PublicKey publicKey;
 
-	public ClientInformationMessage(final String telephoneNumber, final ECPublicKey publicKey, final String nonce, final Encryption... encryptions) {
+	public ClientInformationMessage(final String telephoneNumber, final PublicKey publicKey, final String nonce, final Encryption... encryptions) {
 		super(IDENTIFIER, encryptions);
 		this.telephoneNumber = telephoneNumber;
 		this.publicKey = publicKey;

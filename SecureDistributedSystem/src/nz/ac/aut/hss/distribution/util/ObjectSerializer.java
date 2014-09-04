@@ -13,7 +13,9 @@ public class ObjectSerializer {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				ObjectOutputStream oos = new ObjectOutputStream(baos)) {
 			oos.writeObject(obj);
-			return new String(Base64Coder.encode(baos.toByteArray()));
+			final byte[] bytes = baos.toByteArray();
+			final char[] base64Chars = Base64Coder.encode(bytes);
+			return new String(base64Chars);
 		}
 	}
 
