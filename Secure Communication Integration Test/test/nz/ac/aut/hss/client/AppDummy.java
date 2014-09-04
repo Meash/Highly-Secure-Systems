@@ -1,5 +1,7 @@
 package nz.ac.aut.hss.client;
 
+import nz.ac.aut.hss.client.communication.MobileApp;
+
 import javax.swing.*;
 
 /**

@@ -1,6 +1,5 @@
 package nz.ac.aut.hss.client.communication;
 
-import nz.ac.aut.hss.client.MobileApp;
 import nz.ac.aut.hss.distribution.crypt.AES;
 import nz.ac.aut.hss.distribution.crypt.ClientMessageEncrypter;
 import nz.ac.aut.hss.distribution.crypt.CryptException;
@@ -105,12 +104,17 @@ public class ServerCommunication {
 	 * @return the public key of the client with the given phone number
 	 * @throws ClientDoesNotExistException if the client does not exist
 	 */
-	public PublicKey requestClient(final String telephoneNumber) throws CommunicationException, ClientDoesNotExistException {
+	public PublicKey requestClient(final String telephoneNumber)
+			throws CommunicationException, ClientDoesNotExistException {
 		try {
 			send(new ClientRequestMessage(telephoneNumber));
 			Object msgObj = readObject();
+			if (msgObj instanceof ClientDoesNotExistMessage)
+				throw new ClientDoesNotExistException();
 			if (!(msgObj instanceof ClientPublicKeyMessage))
-				throw new CommunicationException("Expected client public key message, got " + msgObj.getClass().getName());
+				throw new CommunicationException(
+						"Expected client public key or client does not exist message, got " +
+								msgObj.getClass().getName());
 			return ((ClientPublicKeyMessage) msgObj).publicKey;
 		} catch (IOException | ClassNotFoundException e) {
 			throw new CommunicationException("Could not retrieve list", e);

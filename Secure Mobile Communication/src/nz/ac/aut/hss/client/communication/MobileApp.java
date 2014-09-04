@@ -1,4 +1,4 @@
-package nz.ac.aut.hss.client;
+package nz.ac.aut.hss.client.communication;
 
 /**
  * @author Martin Schrimpf
