@@ -10,29 +10,17 @@ import java.security.PrivateKey;
  * @created 03.09.2014
  */
 public class PassiveClientCommunication extends ClientCommunication {
-	private final String partnerPhoneNumber;
-
 	/**
 	 * @param partnerPhoneNumber the phone number of the partner we are connecting to
 	 * @param ownPrivateKey      this client's private key
 	 * @param sessionKey         the secret key for the communication
 	 */
-	public PassiveClientCommunication(final String partnerPhoneNumber, final PrivateKey ownPrivateKey,
-									  final SecretKey sessionKey) {
-		super(app, display, ownPrivateKey);
-		if (partnerPhoneNumber == null || partnerPhoneNumber.length() == 0)
-			throw new IllegalArgumentException("partnerPhoneNumber is null or empty");
-		this.partnerPhoneNumber = partnerPhoneNumber;
+	public PassiveClientCommunication(final String partnerPhoneNumber, final MobileApp app,
+									  final CommunicationDisplay display, final SMSSender smsSender,
+									  final PrivateKey ownPrivateKey, final SecretKey sessionKey)
+			throws CommunicationException {
+		super(partnerPhoneNumber, app, display, smsSender, ownPrivateKey);
 		if (sessionKey == null) throw new IllegalArgumentException("sessionKey is null");
-		this.sessionKey = sessionKey;
-	}
-
-	public void sendMessage(final String message, final boolean confidential, final boolean authenticate) {
-
-	}
-
-	@Override
-	public void receive(final String phone, final String textContent) {
-
+		setSessionKey(sessionKey);
 	}
 }

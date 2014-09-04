@@ -26,28 +26,30 @@ import java.security.PublicKey;
 public abstract class ClientCommunication implements SMSListener {
 	public static final String MESSAGE_IDENTIFIER = "client_communication";
 
+	private final String partnerPhoneNumber;
 	private final MobileApp app;
 	private final CommunicationDisplay display;
 	protected final ClientMessageEncrypter messageEncrypter;
 	private final MessageAuthenticator authenticator;
 	protected final ObjectSerializer serializer;
 	protected final PrivateKey privateKey;
-	private SecretKey sessionKey;
 	private Encryption encryption;
 	protected PublicKey partnerPublicKey;
+	private final SMSSender smsSender;
 
-	/**
-	 * @param app
-	 * @param display
-	 * @param ownPrivateKey this client's private key
-	 */
-	public ClientCommunication(final MobileApp app, final CommunicationDisplay display,
-							   final PrivateKey ownPrivateKey) {
+	public ClientCommunication(final String partnerPhoneNumber, final MobileApp app, final CommunicationDisplay display,
+							   final SMSSender smsSender, final PrivateKey ownPrivateKey) {
+		if (partnerPhoneNumber == null || partnerPhoneNumber.length() == 0)
+			throw new IllegalArgumentException("partnerPhoneNumber is null or empty");
+		this.partnerPhoneNumber = partnerPhoneNumber;
 		if (app == null) throw new IllegalArgumentException("app is null");
 		this.app = app;
 		if (display == null) throw new IllegalArgumentException("display is null");
 		this.display = display;
 		messageEncrypter = new ClientMessageEncrypter(ownPrivateKey);
+		if (smsSender == null) throw new IllegalArgumentException("smsSender is null");
+		this.smsSender = smsSender;
+		if (ownPrivateKey == null) throw new IllegalArgumentException("ownPrivateKey is null");
 		privateKey = ownPrivateKey;
 		try {
 			authenticator = new MessageAuthenticator();
@@ -73,6 +75,14 @@ public abstract class ClientCommunication implements SMSListener {
 				throw new CommunicationException("Could not create authentication", e);
 			}
 		}
+
+		final String content;
+		try {
+			content = serializer.serialize(msg);
+		} catch (IOException e) {
+			throw new CommunicationException("Could not serialize message", e);
+		}
+		smsSender.send(partnerPhoneNumber, content);
 	}
 
 	@Override

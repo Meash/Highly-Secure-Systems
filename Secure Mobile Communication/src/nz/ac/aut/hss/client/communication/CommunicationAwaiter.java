@@ -48,6 +48,7 @@ public class CommunicationAwaiter implements SMSListener {
 			return;
 		}
 		final Message msg;
+		CommunicationDisplay display;
 		try {
 			try {
 				msg = messageEncrypter.decrypt((EncryptedMessage) obj, new RSA(privateKey, null));
@@ -59,15 +60,22 @@ public class CommunicationAwaiter implements SMSListener {
 				sendSMS(phone, new ProtocolInvalidationMessage(
 						"Expected " + CommunicationRequestMessage.class.getSimpleName() + ", got " +
 								msg.getClass().getName()));
-			final CommunicationDisplay display = app.accept(phone);
+			display = app.accept(phone);
 			if (display == null) // denied
 				return;
 			sendSMS(phone, new CommunicationConfirmationMessage(((CommunicationRequestMessage) msg).nonce));
-		} catch(IOException e) {
+		} catch (IOException e) {
 			app.displayError("Could not send SMS: " + e.getMessage());
 			return;
 		}
-		ClientCommunication communication = new PassiveClientCommunication(phone, privateKey, ((CommunicationRequestMessage) msg).sessionKey);
+		ClientCommunication communication;
+		try {
+			communication = new PassiveClientCommunication(phone, app, display, smsSender, privateKey,
+					((CommunicationRequestMessage) msg).sessionKey);
+		} catch (CommunicationException e) {
+			app.displayError("Could not create client communication: " + e.getMessage());
+			return;
+		}
 		smsReceiver.addListener(phone, communication);
 	}
 

@@ -26,10 +26,10 @@ public class ActiveClientCommunication extends ClientCommunication {
 	 * @param ownPrivateKey       this client's private key
 	 * @param serverCommunication the communicator with the trusted key server
 	 */
-	public ActiveClientCommunication(final MobileApp app, final CommunicationDisplay display,
-									 final String partnerPhoneNumber, final PrivateKey ownPrivateKey,
-									 final ServerCommunication serverCommunication) {
-		super(app, display, ownPrivateKey);
+	public ActiveClientCommunication(final String partnerPhoneNumber, final MobileApp app,
+									 final CommunicationDisplay display, final SMSSender smsSender,
+									 final ServerCommunication serverCommunication, final PrivateKey ownPrivateKey) {
+		super(partnerPhoneNumber, app, display, smsSender, ownPrivateKey);
 		if (partnerPhoneNumber == null || partnerPhoneNumber.length() == 0)
 			throw new IllegalArgumentException("partnerPhoneNumber is null or empty");
 		this.partnerPhoneNumber = partnerPhoneNumber;
