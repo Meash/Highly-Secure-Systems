@@ -61,6 +61,7 @@ public abstract class ClientCommunication implements SMSListener {
 
 	public void sendMessage(final String message, final boolean confidential, final boolean authenticate)
 			throws CommunicationException {
+		Encryption[] encryptions = confidential ? createEncryptions() : new Encryption[0];
 		Message msg = new SimpleTextMessage(ClientCommunication.MESSAGE_IDENTIFIER, message, encryptions);
 		try {
 			msg = messageEncrypter.applyEncryptions(msg);
