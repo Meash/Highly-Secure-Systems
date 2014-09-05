@@ -47,8 +47,6 @@ public class ActiveClientCommunication extends ClientCommunication {
 			setSessionKey(sessionKey);
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new CommunicationException("Could not create session key", e);
-		} catch (NoSuchProviderException e) {
-			e.printStackTrace();
 		}
 		messageEncrypter.setSessionKey(sessionKey);
 		final String nonce = RandomStringUtils.randomAlphanumeric(Message.NONCE_LENGTH);

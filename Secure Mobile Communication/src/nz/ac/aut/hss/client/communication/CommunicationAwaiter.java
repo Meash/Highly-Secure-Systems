@@ -40,7 +40,6 @@ public class CommunicationAwaiter implements SMSListener {
 		final Object obj;
 		try {
 			obj = serializer.deserialize(textContent);
-
 		} catch (ClassNotFoundException | IOException ignored) {
 			return; // could not be deserialized -> not an object message -> ignore
 		}
@@ -48,7 +47,7 @@ public class CommunicationAwaiter implements SMSListener {
 			return;
 		}
 		final Message msg;
-		CommunicationDisplay display;
+		final CommunicationDisplay display;
 		try {
 			try {
 				msg = messageEncrypter.decrypt((EncryptedMessage) obj, new RSA(privateKey, null));

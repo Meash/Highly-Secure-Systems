@@ -71,11 +71,8 @@ public abstract class ClientCommunication implements SMSListener {
 		if (authenticate) {
 			try {
 				msg.authentication = authenticator.hash(msg, privateKey);
-			} catch (CryptException e) {
+			} catch (CryptException | IOException e) {
 				throw new CommunicationException("Could not create authentication", e);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 
