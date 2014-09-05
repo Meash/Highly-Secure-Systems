@@ -37,23 +37,22 @@ public class CommunicationAwaiter implements SMSListener {
 
 	@Override
 	public void receive(final String phone, final String textContent) {
-		Object obj = null;
+		final Object obj;
 		try {
 			obj = serializer.deserialize(textContent);
 
-		} catch (IOException ignored) {
+		} catch (ClassNotFoundException | IOException ignored) {
 			return; // could not be deserialized -> not an object message -> ignore
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		if (!(obj instanceof EncryptedMessage)) {
 			return;
 		}
-		Message msg = null;
+		final Message msg;
+		CommunicationDisplay display;
 		try {
 			try {
 				msg = messageEncrypter.decrypt((EncryptedMessage) obj, new RSA(privateKey, null));
+			} catch (CryptException | IOException | ClassNotFoundException e) {
 			} catch (ClassNotFoundException e) {
 				sendSMS(phone, new ProtocolInvalidationMessage("Message could not be decrypted"));
 				return;
@@ -65,15 +64,22 @@ public class CommunicationAwaiter implements SMSListener {
 				sendSMS(phone, new ProtocolInvalidationMessage(
 						"Expected " + CommunicationRequestMessage.class.getSimpleName() + ", got " +
 								msg.getClass().getName()));
-			final CommunicationDisplay display = app.accept(phone);
+			display = app.accept(phone);
 			if (display == null) // denied
 				return;
 			sendSMS(phone, new CommunicationConfirmationMessage(((CommunicationRequestMessage) msg).nonce));
-		} catch(IOException e) {
+		} catch (IOException e) {
 			app.displayError("Could not send SMS: " + e.getMessage());
 			return;
 		}
-		ClientCommunication communication = new PassiveClientCommunication(phone, privateKey, ((CommunicationRequestMessage) msg).sessionKey);
+		ClientCommunication communication;
+		try {
+			communication = new PassiveClientCommunication(phone, app, display, smsSender, privateKey,
+					((CommunicationRequestMessage) msg).sessionKey);
+		} catch (CommunicationException e) {
+			app.displayError("Could not create client communication: " + e.getMessage());
+			return;
+		}
 		smsReceiver.addListener(phone, communication);
 	}
 
