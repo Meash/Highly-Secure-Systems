@@ -6,11 +6,12 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.view.Menu;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 public class Join extends Activity{
 	
-
+	private ClientApplication instance;	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -19,9 +20,13 @@ public class Join extends Activity{
 		Intent intent = new Intent();
 		intent.setAction("android.provider.Telephony.SMS_RECEIVED");
 		sendBroadcast(intent);
+		
+		instance = ClientApplication.getInstance();
 	}
 	
 	public void onJoin(View view) {
+		EditText phoneNoInput = (EditText) findViewById(R.id.phoneText);
+		instance.setPhoneNo(phoneNoInput.getText().toString());
 		Intent intent = new Intent(this, OnetimePasswordInput.class);
 		startActivity(intent);
 	}

@@ -80,8 +80,20 @@ public class ServerCommunication {
 				throw new CommunicationException("Expected join confirmation, got " + msg.getClass().getName());
 			if (!((JoinConfirmationMessage) msg).nonce.equals(nonce))
 				throw new CommunicationException("Invalid nonce reply");
-		} catch (IOException | NoSuchPaddingException | NoSuchAlgorithmException | ClassNotFoundException | CryptException e) {
+		} catch (CryptException e) {
 			throw new CommunicationException(e);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

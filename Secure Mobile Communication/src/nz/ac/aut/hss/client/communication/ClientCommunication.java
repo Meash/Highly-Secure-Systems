@@ -45,14 +45,17 @@ public abstract class ClientCommunication implements SMSListener {
 
 	public void sendMessage(final String message, final boolean confidential, final boolean authenticate)
 			throws CommunicationException {
-		Encryption[] encryptions;
+		Encryption[] encryptions = null;
 		try {
 			if (confidential) {
 				if (sessionKey == null) throw new IllegalStateException("sessionKey has not been set");
 				encryptions = new Encryption[]{new AES(sessionKey)};
 			} else encryptions = new Encryption[0];
-		} catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException e) {
 			throw new CommunicationException("Could not initialize encryption", e);
+		} catch (NoSuchPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		Message msg = new SimpleTextMessage(ClientCommunication.MESSAGE_IDENTIFIER, message, encryptions);
 		try {
@@ -63,8 +66,11 @@ public abstract class ClientCommunication implements SMSListener {
 		if (authenticate) {
 			try {
 				msg.authentication = authenticator.hash(msg, privateKey);
-			} catch (IOException | CryptException e) {
+			} catch (CryptException e) {
 				throw new CommunicationException("Could not create authentication", e);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

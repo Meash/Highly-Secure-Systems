@@ -14,12 +14,13 @@ import android.widget.Toast;
 
 public class SendMessage extends Activity{
 	
-	
+	private ClientApplication instance;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.send_message);
+		instance.getInstance();
 	}
 	
 	public void onSend(View view){
@@ -36,8 +37,8 @@ public class SendMessage extends Activity{
 			authConf += "conf";
 		}
 		
-		SmsSender sender = new SmsSender("02040527278", messageBody, this);
-		sender.sendMessage();
+		SmsSender sender = new SmsSender(this);
+		sender.send("02040527278", messageBody);
 		
 		
 	}

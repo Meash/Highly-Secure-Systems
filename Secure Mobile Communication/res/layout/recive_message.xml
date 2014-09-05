@@ -5,6 +5,7 @@
     android:orientation="vertical" >
     
     <EditText
+        	android:id="@+id/recMessageBody"
     		android:inputType="textMultiLine" 
     		android:lines="8" 
     		android:minLines="6" 
@@ -19,14 +20,12 @@
     <CheckBox android:id="@+id/checkbox_auth_rec"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/authenticated"
-        android:onClick="onCheckboxClicked"/>
+        android:text="@string/authenticated"/>
         
     <CheckBox android:id="@+id/checkbox_conf_rec"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/confidential"
-        android:onClick="onCheckboxClicked"/>
+        android:text="@string/confidential"/>
     
 
 </LinearLayout>

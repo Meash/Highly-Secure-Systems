@@ -37,23 +37,29 @@ public class CommunicationAwaiter implements SMSListener {
 
 	@Override
 	public void receive(final String phone, final String textContent) {
-		final Object obj;
+		Object obj = null;
 		try {
 			obj = serializer.deserialize(textContent);
 
-		} catch (ClassNotFoundException | IOException ignored) {
+		} catch (IOException ignored) {
 			return; // could not be deserialized -> not an object message -> ignore
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		if (!(obj instanceof EncryptedMessage)) {
 			return;
 		}
-		final Message msg;
+		Message msg = null;
 		try {
 			try {
 				msg = messageEncrypter.decrypt((EncryptedMessage) obj, new RSA(privateKey, null));
-			} catch (CryptException | IOException | ClassNotFoundException e) {
+			} catch (ClassNotFoundException e) {
 				sendSMS(phone, new ProtocolInvalidationMessage("Message could not be decrypted"));
 				return;
+			} catch (CryptException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			if (!(msg instanceof CommunicationRequestMessage))
 				sendSMS(phone, new ProtocolInvalidationMessage(

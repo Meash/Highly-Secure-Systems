@@ -44,8 +44,11 @@ public class ActiveClientCommunication extends ClientCommunication {
 		/* request communication with client */
 		try {
 			sessionKey = AES.createKey(128);
-		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException e) {
 			throw new CommunicationException("Could not create session key", e);
+		} catch (NoSuchProviderException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		messageEncrypter.setSessionKey(sessionKey);
 		final String nonce = RandomStringUtils.randomAlphanumeric(Message.NONCE_LENGTH);

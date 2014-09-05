@@ -1,5 +1,7 @@
 package nz.ac.aut.hss.client.communication;
 
+import android.content.Context;
+
 /**
  * @author Martin Schrimpf
  * @created 04.09.2014
@@ -16,4 +18,5 @@ public interface MobileApp {
 	 * @return the communication display if accepts, null if not
 	 */
 	public CommunicationDisplay accept(final String phoneNumber);
+
 }

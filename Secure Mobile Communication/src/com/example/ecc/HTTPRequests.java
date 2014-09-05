@@ -55,7 +55,7 @@ public class HTTPRequests extends Thread{
 		return responseString;
 	}
 	
-	public String getRequest(List<NameValuePair> values){
+	public String postRequest(List<NameValuePair> values){
 		String responseString = "";
 		try {
 			HttpClient httpclient = new DefaultHttpClient();
