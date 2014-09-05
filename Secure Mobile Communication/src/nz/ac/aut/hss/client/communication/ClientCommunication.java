@@ -61,7 +61,6 @@ public abstract class ClientCommunication implements SMSListener {
 
 	public void sendMessage(final String message, final boolean confidential, final boolean authenticate)
 			throws CommunicationException {
-		Encryption[] encryptions = confidential ? createEncryptions() : new Encryption[0];
 		Message msg = new SimpleTextMessage(ClientCommunication.MESSAGE_IDENTIFIER, message, encryptions);
 		try {
 			msg = messageEncrypter.applyEncryptions(msg);
@@ -71,8 +70,11 @@ public abstract class ClientCommunication implements SMSListener {
 		if (authenticate) {
 			try {
 				msg.authentication = authenticator.hash(msg, privateKey);
-			} catch (IOException | CryptException e) {
+			} catch (CryptException e) {
 				throw new CommunicationException("Could not create authentication", e);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 

@@ -23,4 +23,5 @@ public class PassiveClientCommunication extends ClientCommunication {
 		if (sessionKey == null) throw new IllegalArgumentException("sessionKey is null");
 		setSessionKey(sessionKey);
 	}
+
 }

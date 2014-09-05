@@ -53,8 +53,12 @@ public class CommunicationAwaiter implements SMSListener {
 			try {
 				msg = messageEncrypter.decrypt((EncryptedMessage) obj, new RSA(privateKey, null));
 			} catch (CryptException | IOException | ClassNotFoundException e) {
+			} catch (ClassNotFoundException e) {
 				sendSMS(phone, new ProtocolInvalidationMessage("Message could not be decrypted"));
 				return;
+			} catch (CryptException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			if (!(msg instanceof CommunicationRequestMessage))
 				sendSMS(phone, new ProtocolInvalidationMessage(
