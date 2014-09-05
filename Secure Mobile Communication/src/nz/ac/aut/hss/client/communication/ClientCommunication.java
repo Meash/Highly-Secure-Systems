@@ -1,17 +1,15 @@
 package nz.ac.aut.hss.client.communication;
 
 import nz.ac.aut.hss.distribution.auth.MessageAuthenticator;
-import nz.ac.aut.hss.distribution.crypt.AES;
 import nz.ac.aut.hss.distribution.crypt.ClientMessageEncrypter;
 import nz.ac.aut.hss.distribution.crypt.CryptException;
 import nz.ac.aut.hss.distribution.crypt.Encryption;
+import nz.ac.aut.hss.distribution.crypt.RSA;
+import nz.ac.aut.hss.distribution.protocol.ClientCommunicationMessage;
 import nz.ac.aut.hss.distribution.protocol.EncryptedMessage;
 import nz.ac.aut.hss.distribution.protocol.Message;
-import nz.ac.aut.hss.distribution.protocol.SimpleTextMessage;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
 
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -23,34 +21,31 @@ import java.security.PublicKey;
  * @author Martin Schrimpf
  * @created 03.09.2014
  */
-public abstract class ClientCommunication implements SMSListener {
-	public static final String MESSAGE_IDENTIFIER = "client_communication";
-
+public class ClientCommunication {
 	private final String partnerPhoneNumber;
-	private final MobileApp app;
-	private final CommunicationDisplay display;
 	protected final ClientMessageEncrypter messageEncrypter;
 	private final MessageAuthenticator authenticator;
 	protected final ObjectSerializer serializer;
 	protected final PrivateKey privateKey;
-	private Encryption encryption;
+	private final Encryption[] encryptions;
 	protected PublicKey partnerPublicKey;
 	private final SMSSender smsSender;
 
-	public ClientCommunication(final String partnerPhoneNumber, final MobileApp app, final CommunicationDisplay display,
-							   final SMSSender smsSender, final PrivateKey ownPrivateKey) {
+	public ClientCommunication(final String partnerPhoneNumber, final ServerCommunication serverCommunication,
+							   final SMSSender smsSender, final PrivateKey ownPrivateKey)
+			throws CommunicationException, ClientDoesNotExistException {
 		if (partnerPhoneNumber == null || partnerPhoneNumber.length() == 0)
 			throw new IllegalArgumentException("partnerPhoneNumber is null or empty");
 		this.partnerPhoneNumber = partnerPhoneNumber;
-		if (app == null) throw new IllegalArgumentException("app is null");
-		this.app = app;
-		if (display == null) throw new IllegalArgumentException("display is null");
-		this.display = display;
-		messageEncrypter = new ClientMessageEncrypter(ownPrivateKey);
 		if (smsSender == null) throw new IllegalArgumentException("smsSender is null");
 		this.smsSender = smsSender;
 		if (ownPrivateKey == null) throw new IllegalArgumentException("ownPrivateKey is null");
 		privateKey = ownPrivateKey;
+
+		partnerPublicKey = serverCommunication.requestClient(partnerPhoneNumber);
+		encryptions = new Encryption[]{new RSA(privateKey, partnerPublicKey)};
+		messageEncrypter = new ClientMessageEncrypter(ownPrivateKey);
+
 		try {
 			authenticator = new MessageAuthenticator();
 		} catch (NoSuchAlgorithmException e) {
@@ -61,8 +56,8 @@ public abstract class ClientCommunication implements SMSListener {
 
 	public void sendMessage(final String message, final boolean confidential, final boolean authenticate)
 			throws CommunicationException {
-		Encryption[] encryptions = confidential ? createEncryptions() : new Encryption[0];
-		Message msg = new SimpleTextMessage(ClientCommunication.MESSAGE_IDENTIFIER, message, encryptions);
+		Encryption[] encryptions = confidential ? this.encryptions : new Encryption[0];
+		Message msg = new ClientCommunicationMessage(message, encryptions);
 		try {
 			msg = messageEncrypter.applyEncryptions(msg);
 		} catch (CryptException e) {
@@ -85,69 +80,38 @@ public abstract class ClientCommunication implements SMSListener {
 		smsSender.send(partnerPhoneNumber, content);
 	}
 
-	@Override
-	public void receive(final String phone, final String textContent) {
+	public Message stringToMessage(final String str) throws IOException, ClassNotFoundException {
 		final Object obj;
-		try {
-			obj = serializer.deserialize(textContent);
-		} catch (ClassNotFoundException | IOException e) {
-			display.addReceivedMessage(textContent, false, false);
-			return;
-		}
+		obj = serializer.deserialize(str);
 		if (!(obj instanceof Message)) {
-			display.addReceivedMessage(textContent, false, false);
-			return;
+			throw new ClassCastException("Expected " + Message.class.getName() + ", got " + obj.getClass().getName());
 		}
-		Message msg = (Message) obj;
-
-		/* authenticity */
-		boolean authentic;
-		try {
-			authentic = isMessageAuthentic(msg);
-		} catch (IOException | CryptException e) {
-			authentic = false;
-		}
-
-		/* encryption */
-		boolean confidential = isMessageConfidential(msg);
-		if (confidential) {
-			try {
-				msg = messageEncrypter.decrypt((EncryptedMessage) msg, createEncryptions());
-				confidential = true;
-			} catch (CryptException | ClassNotFoundException | IOException e) {
-				confidential = false;
-			}
-		}
-
-		if (!(msg instanceof SimpleTextMessage)) {
-			app.displayError(
-					"Protocol invalidation: Expected message of class " + SimpleTextMessage.class.getSimpleName() +
-							", got " + msg.getClass().getName());
-			return;
-		}
-
-		display.addReceivedMessage(((SimpleTextMessage) msg).content, confidential, authentic);
+		return (Message) obj;
 	}
 
 	public boolean isMessageConfidential(final Message message) {
 		return message instanceof EncryptedMessage;
 	}
 
+	public String getPlainMessage(Message msg) throws IOException, CryptException, ClassNotFoundException {
+		if (!isMessageConfidential(msg)) {
+			verifyClientCommunicationClass(msg);
+			return ((ClientCommunicationMessage) msg).content;
+		}
+		msg = messageEncrypter.decrypt((EncryptedMessage) msg, encryptions);
+		verifyClientCommunicationClass(msg);
+		return ((ClientCommunicationMessage) msg).content;
+	}
+
+	private void verifyClientCommunicationClass(final Message msg) throws IllegalArgumentException {
+		if (!(msg instanceof ClientCommunicationMessage))
+			throw new IllegalArgumentException(
+					"Expected " + ClientCommunicationMessage.class.getSimpleName() + ", got " +
+							msg.getClass().getName());
+	}
+
 	public boolean isMessageAuthentic(final Message message) throws IOException, CryptException {
 		if (partnerPublicKey == null) throw new IllegalStateException("partnerPublicKey has not been set");
 		return authenticator.verify(message, partnerPublicKey);
-	}
-
-	private Encryption[] createEncryptions() {
-		if (encryption == null) throw new IllegalStateException("encryption has not been set");
-		return new Encryption[]{encryption};
-	}
-
-	protected void setSessionKey(final SecretKey key) throws CommunicationException {
-		try {
-			encryption = new AES(key);
-		} catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
-			throw new CommunicationException("Could not initialize encryption", e);
-		}
 	}
 }

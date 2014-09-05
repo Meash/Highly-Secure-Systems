@@ -1,15 +1,12 @@
 package com.example.ecc;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
-public class ReciveMessage extends Activity{
+public class ReceiveMessage extends Activity{
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
