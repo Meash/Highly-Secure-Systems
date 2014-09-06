@@ -27,7 +27,7 @@ public class ClientCommunication {
 	private final MessageAuthenticator authenticator;
 	protected final ObjectSerializer serializer;
 	protected final PrivateKey privateKey;
-	private final Encryption encryption;
+	private final Encryption messageEncryption;
 	protected PublicKey partnerPublicKey;
 	private final SMSSender smsSender;
 
@@ -43,7 +43,7 @@ public class ClientCommunication {
 		privateKey = ownPrivateKey;
 
 		partnerPublicKey = serverCommunication.requestClient(partnerPhoneNumber);
-		encryption = new RSA(privateKey, partnerPublicKey);
+		messageEncryption = new RSA(partnerPublicKey, null);
 		messageEncrypter = new ClientMessageEncrypter(ownPrivateKey);
 
 		try {
@@ -59,13 +59,12 @@ public class ClientCommunication {
 		Message msg;
 		/* encrypt */
 		if (confidential) {
-			final String encryptedContent;
 			try {
-				encryptedContent = encryption.encrypt(content);
+				final String encryptedContent = messageEncryption.encrypt(content);
+				msg = new EncryptedClientCommunicationMessage(encryptedContent);
 			} catch (CryptException e) {
 				throw new CommunicationException("Could not encrypt message", e);
 			}
-			msg = new EncryptedClientCommunicationMessage(encryptedContent);
 		} else {
 			msg = new ClientCommunicationMessage(content);
 		}
@@ -105,7 +104,7 @@ public class ClientCommunication {
 			verifyClientCommunicationClass(msg);
 			return ((ClientCommunicationMessage) msg).content;
 		}
-		return encryption.decrypt(((EncryptedClientCommunicationMessage) msg).content);
+		return messageEncryption.decrypt(((EncryptedClientCommunicationMessage) msg).content);
 	}
 
 	private void verifyClientCommunicationClass(final Message msg) throws IllegalArgumentException {

@@ -37,6 +37,7 @@ public class JoinRequestHandler implements RequestHandler {
 				if (clientMessage.publicKey == null)
 					return new ProtocolInvalidationMessage("No public key provided (null)");
 				authority.addClientPublicKey(clientMessage.telephoneNumber, clientMessage.publicKey);
+				System.out.println("Confirmed new client: " + clientId);
 				// encrypt with client's public key
 				return new JoinConfirmationMessage(clientMessage.nonce, new ECCEncryption(clientMessage.publicKey, null));
 			} else {

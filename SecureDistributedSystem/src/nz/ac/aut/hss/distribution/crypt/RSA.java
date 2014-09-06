@@ -14,11 +14,11 @@ import java.security.*;
 public class RSA implements Encryption {
 	private static final String TRANSFORMATION = "RSA/ECB/PKCS1Padding";
 	private static final String ALGORITHM = "RSA";
-	private final Key key1, key2;
+	private final Key encryptionKey, decryptionKey;
 
-	public RSA(final Key key1, final Key key2) {
-		this.key1 = key1;
-		this.key2 = key2;
+	public RSA(final Key encryptionKey, final Key decryptionKey) {
+		this.encryptionKey = encryptionKey;
+		this.decryptionKey = decryptionKey;
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public class RSA implements Encryption {
 	private String convert(final String input, final int mode) throws CryptException {
 		try {
 			Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-			final Key key = mode == Cipher.ENCRYPT_MODE ? key1 : key2;
+			final Key key = mode == Cipher.ENCRYPT_MODE ? encryptionKey : decryptionKey;
 			if (key == null)
 				throw new IllegalStateException(
 						"Key for " + (mode == Cipher.ENCRYPT_MODE ? "encryption" : "decryption") + " not set");

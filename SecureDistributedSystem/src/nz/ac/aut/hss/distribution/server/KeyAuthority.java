@@ -35,7 +35,9 @@ public class KeyAuthority {
 	private final Map<String, SecretKey> clientSessionKeys;
 
 	public KeyAuthority() throws IOException, ClassNotFoundException {
-		requestAssignments.put(JoinRequestMessage.IDENTIFIER, new JoinRequestHandler(this));
+		final JoinRequestHandler joinRequestHandler = new JoinRequestHandler(this);
+		requestAssignments.put(JoinRequestMessage.IDENTIFIER, joinRequestHandler);
+		requestAssignments.put(ClientInformationMessage.IDENTIFIER, joinRequestHandler);
 		requestAssignments.put(ClientListRequestMessage.IDENTIFIER, new ClientListRequestHandler(this));
 		requestAssignments.put(ClientPublicKeyMessage.IDENTIFIER, new PublicKeyRequestHandler(this));
 

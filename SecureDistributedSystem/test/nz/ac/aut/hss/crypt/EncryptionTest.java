@@ -37,6 +37,12 @@ public abstract class EncryptionTest {
 	}
 
 	@Test
+	public void textReverse() throws CryptException {
+		final String plain = "hello there";
+		testReverse(plain);
+	}
+
+	@Test
 	public void smsMaxLength160() throws Exception {
 		final String plain =
 				"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At v";

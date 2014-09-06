@@ -4,10 +4,10 @@ import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import nz.ac.aut.hss.distribution.crypt.ClientMessageEncrypter;
+import nz.ac.aut.hss.distribution.crypt.Encryption;
 import nz.ac.aut.hss.distribution.crypt.RSA;
 import nz.ac.aut.hss.distribution.protocol.ClientCommunicationMessage;
-import nz.ac.aut.hss.distribution.protocol.EncryptedMessage;
+import nz.ac.aut.hss.distribution.protocol.EncryptedClientCommunicationMessage;
 import nz.ac.aut.hss.distribution.protocol.Message;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
 import org.junit.Before;
@@ -20,8 +20,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.*;
 
 /**
  * @author Martin Schrimpf
@@ -31,12 +31,16 @@ import static org.junit.Assert.assertTrue;
 public class ClientCommunicationTest {
 	private static ObjectSerializer serializer = new ObjectSerializer();
 	private ClientCommunication communication;
-	private final String phone = "123";
+	private final String partnerPhone = "123";
 	@Mocked
-	private ServerCommunication serverComm;
+	private ServerCommunication serverComm = null;
 	@Mocked
-	private SMSSender smsSender;
+	private SMSSender smsSender = null;
+	@Mocked
+	private ServerCommunication partnerServerComm = null;
+	private ClientCommunication partnerCommunication;
 	private static PrivateKey ownPrivateKey;
+	private static PublicKey ownPublicKey;
 	private static PublicKey partnerPublicKey;
 	private static PrivateKey partnerPrivateKey;
 
@@ -44,6 +48,7 @@ public class ClientCommunicationTest {
 	public static void setUpBeforeClass() throws NoSuchAlgorithmException {
 		final KeyPair keyPair = RSA.createKeyPair();
 		ownPrivateKey = keyPair.getPrivate();
+		ownPublicKey = keyPair.getPublic();
 
 		final KeyPair partnerKeyPair = RSA.createKeyPair();
 		partnerPublicKey = partnerKeyPair.getPublic();
@@ -53,11 +58,17 @@ public class ClientCommunicationTest {
 	@Before
 	public void setUp() throws CommunicationException, ClientDoesNotExistException {
 		new NonStrictExpectations() {{
-			serverComm.requestClient(anyString);
+			serverComm.requestClient(partnerPhone);
 			result = partnerPublicKey;
 		}};
+		communication = new ClientCommunication(partnerPhone, serverComm, smsSender, ownPrivateKey);
 
-		communication = new ClientCommunication(phone, serverComm, smsSender, ownPrivateKey);
+		final String ownPhone = "456";
+		new NonStrictExpectations() {{
+			partnerServerComm.requestClient(ownPhone);
+			result = ownPublicKey;
+		}};
+		partnerCommunication = new ClientCommunication(ownPhone, partnerServerComm, smsSender, partnerPrivateKey);
 	}
 
 	@Test
@@ -66,7 +77,7 @@ public class ClientCommunicationTest {
 		communication.sendMessage(msg, false, false);
 		new Verifications() {{
 			final String expectedSerial = serializer.serialize(new ClientCommunicationMessage(msg));
-			smsSender.send(phone, expectedSerial);
+			smsSender.send(partnerPhone, expectedSerial);
 			times = 1;
 		}};
 	}
@@ -77,16 +88,53 @@ public class ClientCommunicationTest {
 		communication.sendMessage(msgContent, true, false);
 		new Verifications() {{
 			final String content;
-			smsSender.send(phone, content = withCapture());
+			smsSender.send(partnerPhone, content = withCapture());
 			times = 1;
 			final Object obj = serializer.deserialize(content);
-			assertTrue(obj instanceof EncryptedMessage);
-			Message msg = (Message) obj;
+			assertThat(obj, instanceOf(EncryptedClientCommunicationMessage.class));
+			EncryptedClientCommunicationMessage msg = (EncryptedClientCommunicationMessage) obj;
 			assertTrue(communication.isMessageConfidential(msg));
-			ClientMessageEncrypter partnerMessageEncrypter = new ClientMessageEncrypter(partnerPrivateKey);
-			msg = partnerMessageEncrypter.decrypt(msg);
-			assertTrue(msg instanceof ClientCommunicationMessage);
-			assertEquals(msgContent, ((ClientCommunicationMessage) msg).content);
+			Encryption encryption = new RSA(null, partnerPrivateKey);
+			final String decryptedContent = encryption.decrypt(msg.content);
+			assertEquals(msgContent, decryptedContent);
+		}};
+	}
+
+	@Test
+	public void authenticatedMessage() throws Exception {
+		final String msgContent = "hello there";
+		communication.sendMessage(msgContent, false, true);
+		new Verifications() {{
+			final String content;
+			smsSender.send(partnerPhone, content = withCapture());
+			times = 1;
+			final Object obj = serializer.deserialize(content);
+			assertThat(obj, instanceOf(ClientCommunicationMessage.class));
+			Message msg = (Message) obj;
+			assertNotNull(msg.authentication);
+			assertTrue(partnerCommunication.isMessageAuthentic(msg));
+		}};
+	}
+
+	@Test
+	public void encryptedAuthenticatedMessage() throws Exception {
+		final String msgContent = "hello there";
+		communication.sendMessage(msgContent, true, true);
+		new Verifications() {{
+			final String content;
+			smsSender.send(partnerPhone, content = withCapture());
+			times = 1;
+			final Object obj = serializer.deserialize(content);
+			/* encryption */
+			assertThat(obj, instanceOf(EncryptedClientCommunicationMessage.class));
+			EncryptedClientCommunicationMessage msg = (EncryptedClientCommunicationMessage) obj;
+			assertTrue(communication.isMessageConfidential(msg));
+			Encryption encryption = new RSA(null, partnerPrivateKey);
+			final String decryptedContent = encryption.decrypt(msg.content);
+			assertEquals(msgContent, decryptedContent);
+			/* authenticity */
+			assertNotNull(msg.authentication);
+			assertTrue(partnerCommunication.isMessageAuthentic(msg));
 		}};
 	}
 }
