@@ -13,7 +13,8 @@ import java.security.NoSuchProviderException;
  * @created 27.08.2014
  */
 public class AES implements Encryption {
-	private static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
+	public static final String KEY_ALGORITHM = "AES";
+	public static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
 	private static final IvParameterSpec initVector =
 			new IvParameterSpec(new byte[]{1, -2, 3, -4, 5, -6, 7, -8, 9, -10, 11, -12, 13, -14, 15, -16});
 	private final SecretKey secret;
@@ -57,7 +58,7 @@ public class AES implements Encryption {
 	}
 
 	public static SecretKey createKey(final int keySize) throws NoSuchProviderException, NoSuchAlgorithmException {
-		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+		KeyGenerator keyGen = KeyGenerator.getInstance(KEY_ALGORITHM);
 		keyGen.init(keySize);
 		return keyGen.generateKey();
 	}

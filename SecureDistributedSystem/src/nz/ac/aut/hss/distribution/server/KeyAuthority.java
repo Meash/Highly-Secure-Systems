@@ -39,7 +39,7 @@ public class KeyAuthority {
 		requestAssignments.put(JoinRequestMessage.IDENTIFIER, joinRequestHandler);
 		requestAssignments.put(ClientInformationMessage.IDENTIFIER, joinRequestHandler);
 		requestAssignments.put(ClientListRequestMessage.IDENTIFIER, new ClientListRequestHandler(this));
-		requestAssignments.put(ClientPublicKeyMessage.IDENTIFIER, new PublicKeyRequestHandler(this));
+		requestAssignments.put(ClientRequestMessage.IDENTIFIER, new PublicKeyRequestHandler(this));
 
 		serializer = new ObjectSerializer();
 		messageEncrypter = new ServerMessageEncrypter(this);
@@ -72,21 +72,16 @@ public class KeyAuthority {
 		Message input = validateMessage(inputObject);
 		input = messageEncrypter.decrypt(input, clientId);
 
-		if (handler == null) {
-			handler = requestAssignments.get(input.identifier);
-		}
+		handler = requestAssignments.get(input.identifier);
+		if (handler == null)
+			throw new ProcessingException("Could not find suitable handler for " + input.identifier);
 		Message outputMessage = handler.processInput(clientId, input);
 
 		if (outputMessage == null)
 			return null;
 		if ((outputMessage instanceof SuppressedMessage))
 			return "";
-		try {
-			outputMessage = messageEncrypter.applyEncryptions(outputMessage);
-			return serializer.serialize(outputMessage);
-		} catch (CryptException e) {
-			throw new ProcessingException("Could not encrypt message", e);
-		}
+		return serializer.serialize(outputMessage);
 	}
 
 	private Object deserializeInput(final String inputLine) throws ProcessingException {
@@ -128,10 +123,6 @@ public class KeyAuthority {
 
 	public SecretKey getOneTimePass(final String clientId) {
 		return clientSessionKeys.get(clientId);
-	}
-
-	public PublicKey getPublicKey(final String phone) {
-		return clientPublicKeys.get(phone);
 	}
 
 	public ServerMessageEncrypter getMessageEncrypter() {

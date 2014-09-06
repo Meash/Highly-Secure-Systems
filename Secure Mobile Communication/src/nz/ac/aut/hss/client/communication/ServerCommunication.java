@@ -1,16 +1,12 @@
 package nz.ac.aut.hss.client.communication;
 
-import nz.ac.aut.hss.distribution.crypt.AES;
-import nz.ac.aut.hss.distribution.crypt.ClientMessageEncrypter;
-import nz.ac.aut.hss.distribution.crypt.CryptException;
-import nz.ac.aut.hss.distribution.crypt.Encryption;
+import nz.ac.aut.hss.distribution.crypt.*;
 import nz.ac.aut.hss.distribution.protocol.*;
-import nz.ac.aut.hss.distribution.util.Base64Coder;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKey;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -33,8 +29,8 @@ public class ServerCommunication {
 	private final ObjectSerializer serializer;
 	private final MobileApp app;
 	private final String phoneNumber;
-	private final ClientMessageEncrypter messageEncrypter;
 	private final KeyPair keyPair;
+	private final KeyUtil keyUtil;
 
 	public ServerCommunication(final String server, final int port, final MobileApp app, final KeyStore keyStore)
 			throws IOException, KeyStoreException {
@@ -46,9 +42,9 @@ public class ServerCommunication {
 		out = new PrintWriter(sock.getOutputStream(), true);
 
 		serializer = new ObjectSerializer();
+		keyUtil = new KeyUtil(AES.KEY_ALGORITHM);
 
 		this.keyPair = keyStore.loadOrCreateAndSaveKeyPair();
-		this.messageEncrypter = new ClientMessageEncrypter(keyPair.getPrivate());
 	}
 
 	public void requestJoin() throws CommunicationException {
@@ -56,28 +52,27 @@ public class ServerCommunication {
 			/* step 1/2: initial request */
 			send(new JoinRequestMessage());
 
-
 			/* step 2/2: confirm one-time password, send client info */
 			final String oneTimePassword = app.getOneTimePassword();
-			final byte[] keyBytes = Base64Coder.decodeString(oneTimePassword).getBytes(Encryption.CHARSET);
-			final SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
-			final AES encryption = new AES(secretKeySpec);
+			final SecretKey key = keyUtil.toKey(oneTimePassword);
+			final AES symmetricEncryption = new AES(key);
 
 			final PublicKey publicKey = keyPair.getPublic();
 			final String nonce = RandomStringUtils.randomAlphanumeric(Message.NONCE_LENGTH);
 			final ClientInformationMessage clientInfoMsg =
-					new ClientInformationMessage(phoneNumber, publicKey, nonce, encryption);
+					new ClientInformationMessage(phoneNumber, publicKey, nonce, symmetricEncryption);
 			send(clientInfoMsg);
 
 			Object msgObj = readObject();
-			if (!(msgObj instanceof EncryptedMessage)) {
+			if (!(msgObj instanceof EncryptedJoinConfirmationMessage)) {
 				throw new CommunicationException(
-						"Invalid reply to request - expected EncryptedMessage, got " + msgObj.getClass().getName());
+						"Invalid reply to request - expected EncryptedJoinConfirmationMessage, got " +
+								msgObj.getClass().getName());
 			}
-			final Message msg = messageEncrypter.decrypt((Message) msgObj);
-			if (!(msg instanceof JoinConfirmationMessage))
-				throw new CommunicationException("Expected join confirmation, got " + msg.getClass().getName());
-			if (!((JoinConfirmationMessage) msg).nonce.equals(nonce))
+			final EncryptedJoinConfirmationMessage msg = (EncryptedJoinConfirmationMessage) msgObj;
+			final Encryption asymmetricEncryption = new RSA(null, keyPair.getPrivate());
+			final String decryptedNonce = asymmetricEncryption.decrypt(msg.encryptedNonce);
+			if (!decryptedNonce.equals(nonce))
 				throw new CommunicationException("Invalid nonce reply");
 		} catch (CryptException | IOException | ClassNotFoundException | NoSuchPaddingException | NoSuchAlgorithmException e) {
 			throw new CommunicationException(e);

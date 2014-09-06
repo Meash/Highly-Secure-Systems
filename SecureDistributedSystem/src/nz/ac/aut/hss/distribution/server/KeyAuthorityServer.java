@@ -24,28 +24,43 @@ public class KeyAuthorityServer extends Thread {
 	public void run() {
 		try {
 			while (!Thread.interrupted()) {
-				try (Socket clientSocket = serverSocket.accept()) {
-					final String id = clientSocket.getLocalAddress() + ":" + clientSocket.getPort();
-					try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-							PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
-						String inputLine;
-						while ((inputLine = in.readLine()) != null) {
-							try {
-								final String response = keyAuthority.processInput(id, inputLine);
-								if (response == null)
-									break;
-								if (response.isEmpty())
-									continue;
-								out.println(response);
-							} catch (Throwable t) {
-								t.printStackTrace();
-								break;
-							}
-						}
-					}
+				final Socket clientSocket;
+				try {
+					clientSocket = serverSocket.accept();
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
+				new Thread() {
+					@Override
+					public void run() {
+						final String id = clientSocket.getLocalAddress() + ":" + clientSocket.getPort();
+						try (BufferedReader in = new BufferedReader(
+								new InputStreamReader(clientSocket.getInputStream()));
+								PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+							String inputLine;
+							while ((inputLine = in.readLine()) != null) {
+								try {
+									final String response = keyAuthority.processInput(id, inputLine);
+									if (response == null)
+										break;
+									if (response.isEmpty())
+										continue;
+									out.println(response);
+								} catch (Throwable t) {
+									t.printStackTrace();
+									break;
+								}
+							}
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						} finally {
+							try {
+								clientSocket.close();
+							} catch (IOException ignored) {
+							}
+						}
+					}
+				}.start();
 			}
 		} finally {
 			try {
