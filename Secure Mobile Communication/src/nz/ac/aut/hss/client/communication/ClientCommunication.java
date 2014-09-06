@@ -46,7 +46,7 @@ public class ClientCommunication {
 		try {
 			authenticator = new MessageAuthenticator();
 		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException("Could not create authenticator", e);
+			throw new CommunicationException("Could not create authenticator", e);
 		}
 		serializer = new ObjectSerializer();
 	}

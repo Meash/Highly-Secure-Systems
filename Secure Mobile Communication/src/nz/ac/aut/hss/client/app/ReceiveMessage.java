@@ -17,7 +17,7 @@ public class ReceiveMessage extends Activity {
 
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.recive_message);
+		setContentView(R.layout.receive_message);
 
 		Intent intent = getIntent();
 		String message = intent.getStringExtra(BODY);

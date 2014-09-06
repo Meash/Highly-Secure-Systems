@@ -23,26 +23,41 @@ import java.util.Map;
  * @created 03.09.2014
  */
 public class ServerCommunication {
-	private final Socket sock;
-	private final BufferedReader in;
-	private final PrintWriter out;
+	private Socket sock;
+	private BufferedReader in;
+	private PrintWriter out;
 	private final ObjectSerializer serializer;
 	private final MobileApp app;
 	private final String phoneNumber;
 	private final KeyPair keyPair;
 	private final KeyUtil keyUtil;
+	private final AsymmetricKeyUtil asymmetricKeyUtil;
 
 	public ServerCommunication(final String server, final int port, final MobileApp app, final KeyPair keyPair)
-			throws IOException, KeyStoreException {
+			throws IOException, KeyStoreException, InterruptedException {
 		this.app = app;
 		this.phoneNumber = app.getPhoneNumber();
 
-		sock = new Socket(server, port);
-		in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-		out = new PrintWriter(sock.getOutputStream(), true);
+		final SavedException<IOException> savedException = new SavedException<>();
+		Thread thread = new Thread() {
+			@Override
+			public void run() {
+				try {
+					sock = new Socket(server, port);
+					in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+					out = new PrintWriter(sock.getOutputStream(), true);
+				} catch (IOException e) {
+					savedException.save(e);
+				}
+			}
+		};
+		thread.start();
+		thread.join();
+		savedException.throwIfSaved();
 
 		serializer = new ObjectSerializer();
 		keyUtil = new KeyUtil(AES.KEY_ALGORITHM);
+		asymmetricKeyUtil = new AsymmetricKeyUtil(RSA.ALGORITHM);
 
 		this.keyPair = keyPair;
 	}
@@ -70,8 +85,9 @@ public class ServerCommunication {
 
 			final PublicKey publicKey = keyPair.getPublic();
 			final String nonce = RandomStringUtils.randomAlphanumeric(Message.NONCE_LENGTH);
+			final String publicKeyString = asymmetricKeyUtil.toString(publicKey);
 			final ClientInformationMessage clientInfoMsg =
-					new ClientInformationMessage(phoneNumber, publicKey, nonce, symmetricEncryption);
+					new ClientInformationMessage(phoneNumber, publicKeyString, nonce, symmetricEncryption);
 			send(clientInfoMsg);
 
 			Object msgObj = readObject();
@@ -153,8 +169,22 @@ public class ServerCommunication {
 		saved.throwIfSaved();
 	}
 
-	private Object readObject() throws IOException, ClassNotFoundException {
-		final String line = in.readLine();
-		return serializer.deserialize(line);
+	private Object readObject() throws IOException, ClassNotFoundException, InterruptedException {
+		final SavedException<IOException> savedException = new SavedException<>();
+		final String[] line = new String[1];
+		Thread thread = new Thread() {
+			@Override
+			public void run() {
+				try {
+					line[0] = in.readLine();
+				} catch (IOException e) {
+					savedException.save(e);
+				}
+			}
+		};
+		thread.start();
+		thread.join();
+		savedException.throwIfSaved();
+		return serializer.deserialize(line[0]);
 	}
 }

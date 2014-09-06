@@ -1,12 +1,10 @@
 package nz.ac.aut.hss.distribution.server;
 
-import nz.ac.aut.hss.distribution.crypt.AES;
-import nz.ac.aut.hss.distribution.crypt.Encryption;
-import nz.ac.aut.hss.distribution.crypt.KeyUtil;
-import nz.ac.aut.hss.distribution.crypt.RSA;
+import nz.ac.aut.hss.distribution.crypt.*;
 import nz.ac.aut.hss.distribution.protocol.*;
 
 import javax.crypto.SecretKey;
+import java.security.PublicKey;
 
 /**
  * @author Martin Schrimpf
@@ -17,10 +15,12 @@ public class JoinRequestHandler implements RequestHandler {
 
 	private final KeyAuthority authority;
 	private final KeyUtil keyUtil;
+	private final AsymmetricKeyUtil asymmetricKeyUtil;
 
 	public JoinRequestHandler(final KeyAuthority authority) {
 		this.authority = authority;
 		keyUtil = new KeyUtil(AES.KEY_ALGORITHM);
+		asymmetricKeyUtil = new AsymmetricKeyUtil(RSA.ALGORITHM);
 	}
 
 
@@ -35,10 +35,10 @@ public class JoinRequestHandler implements RequestHandler {
 				return new SuppressedMessage();
 			} else if (input instanceof ClientInformationMessage) {
 				final ClientInformationMessage clientMessage = (ClientInformationMessage) input;
-				authority.addClientPublicKey(clientMessage.telephoneNumber, clientMessage.publicKey);
+				final PublicKey publicKey = asymmetricKeyUtil.toPublicKey(clientMessage.publicKey);
+				authority.putClientPublicKey(clientMessage.telephoneNumber, publicKey);
 				System.out.println("Confirmed new client: " + clientId);
-				final Encryption encryption =
-						new RSA(clientMessage.publicKey, null); // encrypt with client's public key
+				final Encryption encryption = new RSA(publicKey, null); // encrypt with client's public key
 				final String encryptedNonce = encryption.encrypt(clientMessage.nonce);
 				return new EncryptedJoinConfirmationMessage(encryptedNonce);
 			} else {

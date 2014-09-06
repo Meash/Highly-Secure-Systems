@@ -38,7 +38,7 @@ public class ClientListRequestHandlerTest {
 	public void singleEntry() throws Exception {
 		final String phone = "12345";
 		final PublicKey publicKey = RSA.createKeyPair().getPublic();
-		authority.addClientPublicKey(phone, publicKey);
+		authority.putClientPublicKey(phone, publicKey);
 		Message msg = handler.processInput("1", new ClientListRequestMessage());
 		assertTrue(msg instanceof ClientListMessage);
 		assertEquals(1, ((ClientListMessage) msg).phonePublicKey.size());

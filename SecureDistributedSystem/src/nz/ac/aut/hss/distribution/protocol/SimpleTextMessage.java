@@ -10,7 +10,7 @@ public class SimpleTextMessage extends Message {
 	public final String content;
 
 	public SimpleTextMessage(final String identifier, final String content, final Encryption... encryptions) {
-		super(identifier, encryptions);
+		super(identifier);
 		this.content = content;
 	}
 

@@ -1,5 +1,6 @@
 package nz.ac.aut.hss.server;
 
+import nz.ac.aut.hss.distribution.crypt.AsymmetricKeyUtil;
 import nz.ac.aut.hss.distribution.crypt.RSA;
 import nz.ac.aut.hss.distribution.protocol.*;
 import nz.ac.aut.hss.distribution.server.JoinRequestHandler;
@@ -40,7 +41,8 @@ public class JoinRequestHandlerTest {
 		final String nonce = "1";
 		final KeyPair keyPair = RSA.createKeyPair();
 		final PublicKey publicKey = keyPair.getPublic();
-		Message msg = handler.processInput("1", new ClientInformationMessage("12345", publicKey, nonce));
+		final String publicKeyString = new AsymmetricKeyUtil(RSA.ALGORITHM).toString(publicKey);
+		Message msg = handler.processInput("1", new ClientInformationMessage("12345", publicKeyString, nonce));
 		assertThat(msg, instanceOf(EncryptedJoinConfirmationMessage.class));
 		final String decryptedNonce =
 				new RSA(null, keyPair.getPrivate()).decrypt(((EncryptedJoinConfirmationMessage) msg).encryptedNonce);

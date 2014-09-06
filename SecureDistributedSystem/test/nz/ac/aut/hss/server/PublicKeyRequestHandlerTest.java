@@ -40,7 +40,7 @@ public class PublicKeyRequestHandlerTest {
 	public void singleClient() throws Exception {
 		final String phone = "123456";
 		final PublicKey publicKey = RSA.createKeyPair().getPublic();
-		authority.addClientPublicKey(phone, publicKey);
+		authority.putClientPublicKey(phone, publicKey);
 		Message msg = handler.processInput("1", new ClientRequestMessage(phone));
 		assertTrue(msg instanceof ClientPublicKeyMessage);
 		assertEquals(phone, ((ClientPublicKeyMessage) msg).phone);

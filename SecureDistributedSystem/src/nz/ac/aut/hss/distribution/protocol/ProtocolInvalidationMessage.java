@@ -11,7 +11,7 @@ public class ProtocolInvalidationMessage extends Message {
 	public final String message;
 
 	public ProtocolInvalidationMessage(final String message, final Encryption... encryptions) {
-		super(IDENTIFIER, encryptions);
+		super(IDENTIFIER);
 		this.message = message;
 	}
 }

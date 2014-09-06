@@ -18,7 +18,7 @@ public class ClientPublicKeyMessage extends Message {
 	 * @param publicKey the public key of the client
 	 */
 	public ClientPublicKeyMessage(final String phone, final PublicKey publicKey, final Encryption... encryptions) {
-		super(IDENTIFIER, encryptions);
+		super(IDENTIFIER);
 		if (phone == null)
 			throw new IllegalArgumentException("Phone must not be null");
 		this.phone = phone;

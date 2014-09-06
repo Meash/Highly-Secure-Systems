@@ -12,6 +12,7 @@ public class ServerMain {
 		final KeyAuthorityServer server = new KeyAuthorityServer(port);
 		server.start();
 		server.join();
+		server.getKeyAuthority().storeState();
 		System.out.println("Server stopped");
 	}
 }

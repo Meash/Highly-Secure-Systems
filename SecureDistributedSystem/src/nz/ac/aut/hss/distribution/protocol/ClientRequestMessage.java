@@ -14,7 +14,7 @@ public class ClientRequestMessage extends Message {
 	 * @param phone     the phone number of the client
 	 */
 	public ClientRequestMessage(final String phone, final Encryption... encryptions) {
-		super(IDENTIFIER, encryptions);
+		super(IDENTIFIER);
 		if (phone == null)
 			throw new IllegalArgumentException("Phone must not be null");
 		this.phone = phone;

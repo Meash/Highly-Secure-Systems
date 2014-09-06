@@ -1,8 +1,10 @@
 package nz.ac.aut.hss.client.app;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -25,9 +27,21 @@ public class Join extends Activity {
 		sendBroadcast(intent);
 
 		instance = ClientApplication.getInstance();
+
+		final EditText phoneNoInput = (EditText) findViewById(R.id.phoneText);
+		String phoneNumber = null;
+		try {
+			Log.i("NUMBER", "getting emulator number");
+			TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+			phoneNumber = telephonyManager.getLine1Number();
+			Log.i("NUMBER", "got emulator number");
+		} catch (Throwable t) {
+			Log.i("NUMBER", "couldn't get emulator number", t);
+		}
+		phoneNoInput.setText(phoneNumber);
 	}
 
-	public void onJoin(View view) {
+	public void onClick(View view) {
 		final EditText phoneNoInput = (EditText) findViewById(R.id.phoneText);
 		instance.setPhoneNo(phoneNoInput.getText().toString());
 		KeyStore keyStore = instance.getKeyStore();
@@ -40,16 +54,13 @@ public class Join extends Activity {
 			return;
 		}
 
-		instance.initCommunications("localhost", 61001);
-		instance.setPhoneNo(phoneNoInput.getText().toString());
+		instance.initCommunications("10.0.2.2", 61001);
 
 		try {
 			instance.serverComm.requestJoin1();
 
 			Intent intent = new Intent(this, OnetimePasswordInput.class);
 			startActivity(intent);
-
-			instance.serverComm.requestJoin2();
 		} catch (CommunicationException | InterruptedException e) {
 			instance.displayError("Could not join server", e);
 		}

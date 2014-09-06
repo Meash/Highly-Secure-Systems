@@ -47,7 +47,7 @@ public class ClientApplication extends Application implements MobileApp {
 
 			final SMSSender smsSender = new SmsSender(this);
 			this.communications = new ClientCommunications(serverComm, smsSender, privateKey);
-		} catch (KeyStoreException | IOException e) {
+		} catch (KeyStoreException | IOException | InterruptedException e) {
 			displayError(e.getClass().getSimpleName() + " while initializing server communication: " + e.getMessage(),
 					e);
 //			throw new RuntimeException(e);

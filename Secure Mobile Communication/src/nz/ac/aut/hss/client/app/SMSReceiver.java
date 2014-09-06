@@ -9,7 +9,6 @@ import android.util.Log;
 import nz.ac.aut.hss.client.communication.ClientCommunication;
 import nz.ac.aut.hss.client.communication.ClientCommunications;
 import nz.ac.aut.hss.client.communication.ClientDoesNotExistException;
-import nz.ac.aut.hss.client.communication.CommunicationException;
 import nz.ac.aut.hss.distribution.protocol.Message;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
 
@@ -35,20 +34,20 @@ public class SMSReceiver extends BroadcastReceiver {
 		try {
 
 			if (bundle != null) {
+				ClientApplication.getInstance().displayError("Received something", null);
 
 				final Object[] pdusObj = (Object[]) bundle.get("pdus");
 
 				for (final Object aPdusObj : pdusObj) {
 
-					SmsMessage currentMessage = SmsMessage
-							.createFromPdu((byte[]) aPdusObj);
-					String phoneNumber = currentMessage
-							.getDisplayOriginatingAddress();
+					SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) aPdusObj);
+					String phoneNumber = currentMessage.getDisplayOriginatingAddress();
 
 					String message = currentMessage.getDisplayMessageBody();
 
-					Log.i("SmsReceiver", "senderNum: " + phoneNumber
-							+ "; message: " + message);
+					ClientApplication.getInstance()
+							.displayError("Received message from " + phoneNumber + ": " + message, null);
+					Log.i("SmsReceiver", "senderNum: " + phoneNumber + "; message: " + message);
 
 					// Show Alert
 					/*
@@ -69,7 +68,7 @@ public class SMSReceiver extends BroadcastReceiver {
 					boolean confidential, authenticated;
 					try {
 						final Object msgObj = serializer.deserialize(message);
-						if(! (msgObj instanceof Message)) {
+						if (!(msgObj instanceof Message)) {
 							app.displayError("Expected class Message, got " + msgObj.getClass().getName(), null);
 						}
 						Message msg = (Message) msgObj;
@@ -81,6 +80,9 @@ public class SMSReceiver extends BroadcastReceiver {
 						confidential = authenticated = false;
 					}
 
+					ClientApplication.getInstance().displayError(
+							"Received " + plain + " (c=" + confidential + ", a=" + authenticated + ")", null);
+
 					Intent receiveMessage = new Intent(context.getApplicationContext(), ReceiveMessage.class);
 					receiveMessage.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 					receiveMessage.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -91,11 +93,8 @@ public class SMSReceiver extends BroadcastReceiver {
 
 				} // end for loop
 			} // bundle is null
-		} catch (CommunicationException e) {
-			app.displayError("Communication error: " + e.getMessage(), e);
 		} catch (Exception e) {
-			Log.e("SmsReceiver", "Exception smsReceiver" + e);
-
+			app.displayError("Communication error: " + e.getMessage(), e);
 		}
 	}
 }

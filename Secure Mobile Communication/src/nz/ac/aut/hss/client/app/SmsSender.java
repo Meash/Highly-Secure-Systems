@@ -1,17 +1,12 @@
 package nz.ac.aut.hss.client.app;
 
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.telephony.gsm.SmsManager;
 import nz.ac.aut.hss.client.communication.SMSSender;
 
 public class SmsSender implements SMSSender {
 
-	String reciverNumber;
-	String message;
 	Context context;
-	SmsManager smsManager = SmsManager.getDefault();
 
 	public SmsSender(Context context) {
 		this.context = context;
@@ -19,11 +14,15 @@ public class SmsSender implements SMSSender {
 
 	@Override
 	public void send(String phone, String content) {
-		reciverNumber = phone;
-		message = content;
-		PendingIntent sentPendingIntent = PendingIntent.getBroadcast(context, 0, new Intent("SMS_SENT"), 0);
-		PendingIntent deliveredPendingIntent = PendingIntent.getBroadcast(context, 0, new Intent("SMS_DELIVERED"), 0);
-		smsManager.sendTextMessage(reciverNumber, null, message, sentPendingIntent, deliveredPendingIntent);
+		ClientApplication.getInstance().displayError("Sending " + content + " to " + phone, null);
+
+		SmsManager smsManager = SmsManager.getDefault();
+
+//		PendingIntent sentPendingIntent = PendingIntent.getBroadcast(context, 0, new Intent("SMS_SENT"), 0);
+//		PendingIntent deliveredPendingIntent = PendingIntent.getBroadcast(context, 0, new Intent("SMS_DELIVERED"), 0);
+//		smsManager.sendTextMessage(phone, null, content, sentPendingIntent, deliveredPendingIntent);
+		smsManager.sendTextMessage(phone, null, content, null, null);
+		ClientApplication.getInstance().displayError("Sent " + content + " to " + phone, null);
 
 	}
 

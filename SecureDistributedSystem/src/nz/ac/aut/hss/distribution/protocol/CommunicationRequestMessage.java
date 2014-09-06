@@ -17,7 +17,7 @@ public class CommunicationRequestMessage extends Message {
 
 	public CommunicationRequestMessage(final String nonce, final SecretKey sessionKey,
 									   final PublicKey publicKey, final Encryption... encryptions) {
-		super(IDENTIFIER, encryptions);
+		super(IDENTIFIER);
 		this.nonce = nonce;
 		this.sessionKey = sessionKey;
 		this.publicKey = publicKey;

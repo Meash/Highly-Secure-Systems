@@ -16,7 +16,7 @@ public class ClientListMessage extends Message {
 	public final Map<String, PublicKey> phonePublicKey;
 
 	public ClientListMessage(final Map<String, PublicKey> phonePublicKey, final Encryption... encryptions) {
-		super(IDENTIFIER, encryptions);
+		super(IDENTIFIER);
 		this.phonePublicKey = phonePublicKey;
 	}
 }

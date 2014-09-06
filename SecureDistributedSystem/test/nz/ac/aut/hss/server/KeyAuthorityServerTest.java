@@ -1,6 +1,7 @@
 package nz.ac.aut.hss.server;
 
 import nz.ac.aut.hss.distribution.crypt.AES;
+import nz.ac.aut.hss.distribution.crypt.AsymmetricKeyUtil;
 import nz.ac.aut.hss.distribution.crypt.KeyUtil;
 import nz.ac.aut.hss.distribution.crypt.RSA;
 import nz.ac.aut.hss.distribution.protocol.ClientInformationMessage;
@@ -67,9 +68,10 @@ public class KeyAuthorityServerTest {
 				final KeyPair keyPair = RSA.createKeyPair();
 				final PrivateKey privateKey = keyPair.getPrivate();
 				final PublicKey publicKey = keyPair.getPublic();
+				final String publicKeyString = new AsymmetricKeyUtil(RSA.ALGORITHM).toString(publicKey);
 
 				final ClientInformationMessage clientInfoMsg =
-						new ClientInformationMessage("12345", publicKey, nonce, encryption);
+						new ClientInformationMessage("12345", publicKeyString, nonce, encryption);
 				out.println(serializer.serialize(clientInfoMsg));
 
 				final String line = in.readLine();

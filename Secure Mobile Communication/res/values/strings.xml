@@ -11,7 +11,7 @@
     <string name="join_request">Join Request</string>
     <string name="join">Join</string>
     <string name="pass_hint">One time password</string>
-    <string name="reciver">Reciver:</string>
+    <string name="receiver">Receiver:</string>
     <string name="authenticated">authenticated</string>
     <string name="confidential">confidential</string>
     <string name="send">Send</string>

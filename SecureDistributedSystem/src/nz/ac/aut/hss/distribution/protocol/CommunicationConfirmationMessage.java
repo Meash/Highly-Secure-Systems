@@ -11,7 +11,7 @@ public class CommunicationConfirmationMessage extends Message {
 	public final String nonce;
 
 	public CommunicationConfirmationMessage(final String nonce, final Encryption... encryptions) {
-		super(IDENTIFIER, encryptions);
+		super(IDENTIFIER);
 		this.nonce = nonce;
 	}
 }

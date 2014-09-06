@@ -108,7 +108,7 @@ public class KeyAuthority {
 		return clientPublicKeys;
 	}
 
-	public void addClientPublicKey(final String phone, final PublicKey publicKey) {
+	public void putClientPublicKey(final String phone, final PublicKey publicKey) {
 		clientPublicKeys.put(phone, publicKey);
 	}
 
