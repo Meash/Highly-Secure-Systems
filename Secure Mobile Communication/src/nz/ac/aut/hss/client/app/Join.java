@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+import nz.ac.aut.hss.client.communication.CommunicationException;
 import nz.ac.aut.hss.client.communication.KeyStore;
 
 import java.security.KeyStoreException;
@@ -39,15 +40,19 @@ public class Join extends Activity {
 			return;
 		}
 
-		new Thread() {
-			public void run() {
-				instance.initCommunications("localhost", 61001);
-				instance.setPhoneNo(phoneNoInput.getText().toString());
-			}
-		}.start();
+		instance.initCommunications("localhost", 61001);
+		instance.setPhoneNo(phoneNoInput.getText().toString());
 
-		Intent intent = new Intent(this, OnetimePasswordInput.class);
-		startActivity(intent);
+		try {
+			instance.serverComm.requestJoin1();
+
+			Intent intent = new Intent(this, OnetimePasswordInput.class);
+			startActivity(intent);
+
+			instance.serverComm.requestJoin2();
+		} catch (CommunicationException | InterruptedException e) {
+			instance.displayError("Could not join server", e);
+		}
 	}
 
 

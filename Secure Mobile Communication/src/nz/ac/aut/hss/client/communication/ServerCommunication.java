@@ -32,7 +32,7 @@ public class ServerCommunication {
 	private final KeyPair keyPair;
 	private final KeyUtil keyUtil;
 
-	public ServerCommunication(final String server, final int port, final MobileApp app, final KeyStore keyStore)
+	public ServerCommunication(final String server, final int port, final MobileApp app, final KeyPair keyPair)
 			throws IOException, KeyStoreException {
 		this.app = app;
 		this.phoneNumber = app.getPhoneNumber();
@@ -44,14 +44,25 @@ public class ServerCommunication {
 		serializer = new ObjectSerializer();
 		keyUtil = new KeyUtil(AES.KEY_ALGORITHM);
 
-		this.keyPair = keyStore.loadOrCreateAndSaveKeyPair();
+		this.keyPair = keyPair;
 	}
 
 	public void requestJoin() throws CommunicationException, InterruptedException {
+		requestJoin1();
+		requestJoin2();
+	}
+
+	public void requestJoin1() throws CommunicationException, InterruptedException {
 		try {
 			/* step 1/2: initial request */
 			send(new JoinRequestMessage());
+		} catch (IOException e) {
+			throw new CommunicationException(e);
+		}
+	}
 
+	public void requestJoin2() throws CommunicationException, InterruptedException {
+		try {
 			/* step 2/2: confirm one-time password, send client info */
 			final String oneTimePassword = app.getOneTimePassword();
 			final SecretKey key = keyUtil.toKey(oneTimePassword);

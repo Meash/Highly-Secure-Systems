@@ -6,6 +6,7 @@ import android.widget.Toast;
 import nz.ac.aut.hss.client.communication.*;
 
 import java.io.IOException;
+import java.security.KeyPair;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 
@@ -38,11 +39,13 @@ public class ClientApplication extends Application implements MobileApp {
 
 	public void initCommunications(String server, int port) {
 		try {
-			serverComm = new ServerCommunication(server, port, this, keyStore);
+			final KeyPair keyPair = keyStore.loadOrCreateAndSaveKeyPair();
+			final PrivateKey privateKey = keyPair.getPrivate();
+
+			serverComm = new ServerCommunication(server, port, this, keyPair);
 			Toast.makeText(getApplicationContext(), "server connected", Toast.LENGTH_LONG).show();
 
 			final SMSSender smsSender = new SmsSender(this);
-			final PrivateKey privateKey = keyStore.loadOrCreateAndSaveKeyPair().getPrivate();
 			this.communications = new ClientCommunications(serverComm, smsSender, privateKey);
 		} catch (KeyStoreException | IOException e) {
 			displayError(e.getClass().getSimpleName() + " while initializing server communication: " + e.getMessage(),
