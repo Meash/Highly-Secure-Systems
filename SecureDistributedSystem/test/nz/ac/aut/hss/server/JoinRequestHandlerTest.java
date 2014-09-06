@@ -1,6 +1,6 @@
 package nz.ac.aut.hss.server;
 
-import nz.ac.aut.hss.distribution.crypt.ECCEncryption;
+import nz.ac.aut.hss.distribution.crypt.RSA;
 import nz.ac.aut.hss.distribution.protocol.*;
 import nz.ac.aut.hss.distribution.server.JoinRequestHandler;
 import nz.ac.aut.hss.distribution.server.KeyAuthority;
@@ -9,10 +9,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.security.interfaces.ECPublicKey;
+import java.security.KeyPair;
+import java.security.PublicKey;
 
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Martin Schrimpf
@@ -36,9 +38,12 @@ public class JoinRequestHandlerTest {
 	public void twoStep() throws Exception {
 		handshake();
 		final String nonce = "1";
-		final ECPublicKey publicKey = (ECPublicKey) ECCEncryption.createKeyPair().getPublic();
+		final KeyPair keyPair = RSA.createKeyPair();
+		final PublicKey publicKey = keyPair.getPublic();
 		Message msg = handler.processInput("1", new ClientInformationMessage("12345", publicKey, nonce));
-		assertTrue(msg instanceof JoinConfirmationMessage);
-		assertEquals(nonce, ((JoinConfirmationMessage) msg).nonce);
+		assertThat(msg, instanceOf(EncryptedJoinConfirmationMessage.class));
+		final String decryptedNonce =
+				new RSA(null, keyPair.getPrivate()).decrypt(((EncryptedJoinConfirmationMessage) msg).encryptedNonce);
+		assertEquals(nonce, decryptedNonce);
 	}
 }

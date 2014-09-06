@@ -34,6 +34,7 @@ public class MessageEncrypterTest {
 	@Test
 	public void plainTextReverse() throws CryptException, IOException, ClassNotFoundException {
 		final Message source = new SimpleTextMessage(IDENTIFIER, "some text 123!");
+		expectedException.expect(IllegalArgumentException.class);
 		testReverse(source);
 	}
 
