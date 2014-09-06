@@ -34,6 +34,7 @@ public class KeyAuthorityServer extends Thread {
 					@Override
 					public void run() {
 						final String id = clientSocket.getLocalAddress() + ":" + clientSocket.getPort();
+						System.out.println("New client: " + id);
 						try (BufferedReader in = new BufferedReader(
 								new InputStreamReader(clientSocket.getInputStream()));
 								PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {

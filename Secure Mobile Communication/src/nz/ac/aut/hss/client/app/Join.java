@@ -35,7 +35,7 @@ public class Join extends Activity {
 			keyStore.loadOrCreateAndSaveKeyPair();
 			Log.i("KEY_CREATED", "Keys loaded");
 		} catch (KeyStoreException e) {
-			instance.displayError("Could not load keys: " + e.getMessage());
+			instance.displayError("Could not load keys: " + e.getMessage(), e);
 			return;
 		}
 

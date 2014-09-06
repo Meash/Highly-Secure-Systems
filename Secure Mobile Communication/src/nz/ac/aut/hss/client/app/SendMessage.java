@@ -32,8 +32,8 @@ public class SendMessage extends Activity {
 		try {
 			userMap = clientApplication.serverComm.requestList();
 		} catch (CommunicationException | InterruptedException e) {
-			clientApplication
-					.displayError(e.getClass().getSimpleName() + " while requesting client list: " + e.getMessage());
+			clientApplication.displayError(
+					e.getClass().getSimpleName() + " while requesting client list: " + e.getMessage(), e);
 			return;
 		}
 
@@ -55,7 +55,7 @@ public class SendMessage extends Activity {
 			ClientCommunication communication = communications.getOrCreate(phone);
 			communication.sendMessage(messageBody, confCheck.isChecked(), authCheck.isChecked());
 		} catch (Throwable t) {
-			clientApplication.displayError(t.getClass().getSimpleName() + " sending message: " + t.getMessage());
+			clientApplication.displayError(t.getClass().getSimpleName() + " sending message: " + t.getMessage(), t);
 		}
 	}
 

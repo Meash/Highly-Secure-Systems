@@ -61,7 +61,7 @@ public class SMSReceiver extends BroadcastReceiver {
 					try {
 						communication = communications.getOrCreate(phoneNumber);
 					} catch (ClientDoesNotExistException e) {
-						app.displayError("Client " + phoneNumber + " does not exist");
+						app.displayError("Client " + phoneNumber + " does not exist", e);
 						return;
 					}
 
@@ -70,7 +70,7 @@ public class SMSReceiver extends BroadcastReceiver {
 					try {
 						final Object msgObj = serializer.deserialize(message);
 						if(! (msgObj instanceof Message)) {
-							app.displayError("Expected class Message, got " + msgObj.getClass().getName());
+							app.displayError("Expected class Message, got " + msgObj.getClass().getName(), null);
 						}
 						Message msg = (Message) msgObj;
 						plain = communication.getPlainMessage(msg);
@@ -92,7 +92,7 @@ public class SMSReceiver extends BroadcastReceiver {
 				} // end for loop
 			} // bundle is null
 		} catch (CommunicationException e) {
-			app.displayError("Communication error: " + e.getMessage());
+			app.displayError("Communication error: " + e.getMessage(), e);
 		} catch (Exception e) {
 			Log.e("SmsReceiver", "Exception smsReceiver" + e);
 

@@ -1,6 +1,7 @@
 package nz.ac.aut.hss.client.app;
 
 import android.app.Application;
+import android.util.Log;
 import android.widget.Toast;
 import nz.ac.aut.hss.client.communication.*;
 
@@ -44,13 +45,16 @@ public class ClientApplication extends Application implements MobileApp {
 			final PrivateKey privateKey = keyStore.loadOrCreateAndSaveKeyPair().getPrivate();
 			this.communications = new ClientCommunications(serverComm, smsSender, privateKey);
 		} catch (KeyStoreException | IOException e) {
-			displayError(e.getClass().getSimpleName() + " while initializing server communication: " + e.getMessage());
-			throw new RuntimeException(e);
+			displayError(e.getClass().getSimpleName() + " while initializing server communication: " + e.getMessage(),
+					e);
+//			throw new RuntimeException(e);
 		}
 	}
 
 	@Override
-	public void displayError(String message) {
+	public void displayError(String message, Throwable tr) {
+		if (tr != null) Log.i("GENERAL", message, tr);
+		else Log.i("GENERAL", message);
 		Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
 	}
 

@@ -9,5 +9,5 @@ public interface MobileApp {
 
 	public String getPhoneNumber();
 
-	public void displayError(final String message);
+	public void displayError(final String message, final Throwable tr);
 }

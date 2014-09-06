@@ -13,7 +13,7 @@ import java.security.*;
  */
 public class RSA implements Encryption {
 	private static final String TRANSFORMATION = "RSA/ECB/PKCS1Padding";
-	private static final String ALGORITHM = "RSA";
+	public static final String ALGORITHM = "RSA";
 	private final Key encryptionKey, decryptionKey;
 
 	public RSA(final Key encryptionKey, final Key decryptionKey) {

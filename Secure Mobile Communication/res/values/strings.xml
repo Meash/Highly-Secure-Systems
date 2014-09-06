@@ -12,7 +12,7 @@
     <string name="join">Join</string>
     <string name="pass_hint">One time password</string>
     <string name="reciver">Reciver:</string>
-    <string name="authenticated">authenicated</string>
+    <string name="authenticated">authenticated</string>
     <string name="confidential">confidential</string>
     <string name="send">Send</string>
     <string name="message">Message</string>
