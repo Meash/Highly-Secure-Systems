@@ -1,7 +1,6 @@
 package nz.ac.aut.hss.client.communication;
 
 import nz.ac.aut.hss.distribution.auth.MessageAuthenticator;
-import nz.ac.aut.hss.distribution.crypt.ClientMessageEncrypter;
 import nz.ac.aut.hss.distribution.crypt.CryptException;
 import nz.ac.aut.hss.distribution.crypt.Encryption;
 import nz.ac.aut.hss.distribution.crypt.RSA;
@@ -23,7 +22,6 @@ import java.security.PublicKey;
  */
 public class ClientCommunication {
 	private final String partnerPhoneNumber;
-	protected final ClientMessageEncrypter messageEncrypter;
 	private final MessageAuthenticator authenticator;
 	protected final ObjectSerializer serializer;
 	protected final PrivateKey privateKey;
@@ -44,7 +42,6 @@ public class ClientCommunication {
 
 		partnerPublicKey = serverCommunication.requestClient(partnerPhoneNumber);
 		messageEncryption = new RSA(partnerPublicKey, null);
-		messageEncrypter = new ClientMessageEncrypter(ownPrivateKey);
 
 		try {
 			authenticator = new MessageAuthenticator();

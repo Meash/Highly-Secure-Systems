@@ -1,7 +1,6 @@
 package nz.ac.aut.hss.distribution.server;
 
 import nz.ac.aut.hss.distribution.crypt.CryptException;
-import nz.ac.aut.hss.distribution.crypt.ServerMessageEncrypter;
 import nz.ac.aut.hss.distribution.protocol.*;
 import nz.ac.aut.hss.distribution.util.ObjectFileStore;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
@@ -27,8 +26,6 @@ public class KeyAuthority {
 	private final Map<String, RequestHandler> requestAssignments = new HashMap<>();
 
 	private final ObjectSerializer serializer;
-	private final ServerMessageEncrypter messageEncrypter;
-	private RequestHandler handler;
 	/** Phone -> public key */
 	private final Map<String, PublicKey> clientPublicKeys;
 	/** ID -> one-time-pass */
@@ -42,7 +39,6 @@ public class KeyAuthority {
 		requestAssignments.put(ClientRequestMessage.IDENTIFIER, new PublicKeyRequestHandler(this));
 
 		serializer = new ObjectSerializer();
-		messageEncrypter = new ServerMessageEncrypter(this);
 		//noinspection unchecked
 		clientPublicKeys = loadMap(CLIENT_PUBLICKEY_FILE);
 		clientSessionKeys = new HashMap<>();
@@ -70,9 +66,8 @@ public class KeyAuthority {
 			throws ProcessingException, IOException, CryptException, ClassNotFoundException {
 		final Object inputObject = deserializeInput(inputLine);
 		Message input = validateMessage(inputObject);
-		input = messageEncrypter.decrypt(input, clientId);
 
-		handler = requestAssignments.get(input.identifier);
+		final RequestHandler handler = requestAssignments.get(input.identifier);
 		if (handler == null)
 			throw new ProcessingException("Could not find suitable handler for " + input.identifier);
 		Message outputMessage = handler.processInput(clientId, input);
@@ -123,9 +118,5 @@ public class KeyAuthority {
 
 	public SecretKey getOneTimePass(final String clientId) {
 		return clientSessionKeys.get(clientId);
-	}
-
-	public ServerMessageEncrypter getMessageEncrypter() {
-		return messageEncrypter;
 	}
 }
