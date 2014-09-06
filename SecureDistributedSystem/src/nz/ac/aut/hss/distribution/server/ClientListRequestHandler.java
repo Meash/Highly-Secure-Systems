@@ -22,6 +22,7 @@ public class ClientListRequestHandler implements RequestHandler {
 			return new ProtocolInvalidationMessage(
 					"Expected message of class " + ClientListMessage.class.getName() + ", got " +
 							input.getClass().getName());
+		System.out.println("Client list to " + clientId);
 		return new ClientListMessage(authority.getClientPublicKeys());
 	}
 }

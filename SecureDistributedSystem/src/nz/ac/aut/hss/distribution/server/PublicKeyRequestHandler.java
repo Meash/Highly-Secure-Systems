@@ -28,8 +28,11 @@ public class PublicKeyRequestHandler implements RequestHandler {
 		final ClientPublicKeyMessage request = (ClientPublicKeyMessage) input;
 		final Map<String, PublicKey> phonePublicKey = authority.getClientPublicKeys();
 		final PublicKey publicKey = phonePublicKey.get(request.phone);
-		if(publicKey == null)
+		if (publicKey == null) {
+			System.out.println("ClientDoesNotExistMessage(" + request.phone + ") to " + clientId);
 			return new ClientDoesNotExistMessage(request.phone);
+		}
+		System.out.println("Client public key (" + request.phone + ") to " + clientId);
 		return new ClientPublicKeyMessage(request.phone, publicKey);
 	}
 }
