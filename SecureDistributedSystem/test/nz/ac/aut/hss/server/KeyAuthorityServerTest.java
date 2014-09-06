@@ -1,27 +1,24 @@
 package nz.ac.aut.hss.server;
 
 import nz.ac.aut.hss.distribution.crypt.AES;
-import nz.ac.aut.hss.distribution.crypt.ECCEncryption;
-import nz.ac.aut.hss.distribution.crypt.Encryption;
-import nz.ac.aut.hss.distribution.crypt.ServerMessageEncrypter;
+import nz.ac.aut.hss.distribution.crypt.KeyUtil;
+import nz.ac.aut.hss.distribution.crypt.RSA;
 import nz.ac.aut.hss.distribution.protocol.ClientInformationMessage;
-import nz.ac.aut.hss.distribution.protocol.EncryptedMessage;
-import nz.ac.aut.hss.distribution.protocol.JoinConfirmationMessage;
+import nz.ac.aut.hss.distribution.protocol.EncryptedJoinConfirmationMessage;
 import nz.ac.aut.hss.distribution.protocol.JoinRequestMessage;
 import nz.ac.aut.hss.distribution.server.JoinRequestHandler;
 import nz.ac.aut.hss.distribution.server.KeyAuthorityServer;
-import nz.ac.aut.hss.distribution.util.Base64Coder;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKey;
 import java.io.*;
 import java.net.Socket;
 import java.security.KeyPair;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 import static org.junit.Assert.assertEquals;
 
@@ -63,14 +60,13 @@ public class KeyAuthorityServerTest {
 				final String consoleInput = baos.toString();
 				final String oneTimePassword = consoleInput.substring(JoinRequestHandler.CONVEY_MESSAGE.length(),
 						consoleInput.length() - 2);
-				final byte[] keyBytes = Base64Coder.decodeString(oneTimePassword).getBytes(Encryption.CHARSET);
-				final SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
+				final SecretKey secretKeySpec = new KeyUtil(AES.KEY_ALGORITHM).toKey(oneTimePassword);
 				final AES encryption = new AES(secretKeySpec);
 
 				final String nonce = "somenonce";
-				final KeyPair keyPair = ECCEncryption.createKeyPair();
-				final ECPrivateKey privateKey = (ECPrivateKey) keyPair.getPrivate();
-				final ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
+				final KeyPair keyPair = RSA.createKeyPair();
+				final PrivateKey privateKey = keyPair.getPrivate();
+				final PublicKey publicKey = keyPair.getPublic();
 
 				final ClientInformationMessage clientInfoMsg =
 						new ClientInformationMessage("12345", publicKey, nonce, encryption);
@@ -78,11 +74,10 @@ public class KeyAuthorityServerTest {
 
 				final String line = in.readLine();
 				Object msgObj = serializer.deserialize(line);
-				assertEquals(EncryptedMessage.class, msgObj.getClass());
-				final ServerMessageEncrypter messageEncrypter = server.getKeyAuthority().getMessageEncrypter();
-				msgObj = messageEncrypter.decrypt(((EncryptedMessage) msgObj), new ECCEncryption(privateKey, null));
-				assertEquals(JoinConfirmationMessage.class, msgObj.getClass());
-				assertEquals(nonce, ((JoinConfirmationMessage) msgObj).nonce);
+				assertEquals(EncryptedJoinConfirmationMessage.class, msgObj.getClass());
+				final String decryptedNonce =
+						new RSA(null, privateKey).decrypt(((EncryptedJoinConfirmationMessage) msgObj).encryptedNonce);
+				assertEquals(nonce, decryptedNonce);
 			}
 		}
 	}
