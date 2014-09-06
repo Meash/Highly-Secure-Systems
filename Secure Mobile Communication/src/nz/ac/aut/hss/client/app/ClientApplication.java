@@ -1,4 +1,4 @@
-package com.example.ecc;
+package nz.ac.aut.hss.client.app;
 
 import android.app.Application;
 import android.widget.Toast;
@@ -27,6 +27,7 @@ public class ClientApplication extends Application implements MobileApp {
 		return phoneNo;
 	}
 
+	@Override
 	public void displayError(String message) {
 		Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
 	}

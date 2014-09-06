@@ -1,10 +1,11 @@
-package com.example.ecc;
+package nz.ac.aut.hss.client.app;
 
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
+import com.example.ecc.R;
 
 public class MainActivity extends Activity {
 

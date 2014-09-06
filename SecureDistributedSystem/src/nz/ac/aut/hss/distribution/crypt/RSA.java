@@ -49,7 +49,7 @@ public class RSA implements Encryption {
 
 	public static KeyPair createKeyPair() throws NoSuchAlgorithmException {
 		KeyPairGenerator kpg = KeyPairGenerator.getInstance(ALGORITHM);
-		kpg.initialize(4096); //2048);
+		kpg.initialize(2048);
 		return kpg.generateKeyPair();
 	}
 }

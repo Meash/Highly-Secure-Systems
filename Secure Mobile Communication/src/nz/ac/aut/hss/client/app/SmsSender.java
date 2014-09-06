@@ -1,4 +1,4 @@
-package com.example.ecc;
+package nz.ac.aut.hss.client.app;
 
 import nz.ac.aut.hss.client.communication.SMSSender;
 import android.app.PendingIntent;

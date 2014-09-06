@@ -19,6 +19,8 @@ public class MessageEncrypter {
 
 	public EncryptedMessage applyEncryptions(Message msg) throws CryptException {
 		final Encryption[] encryptions = msg.getEncryptions();
+		if(encryptions.length == 0)
+			throw new IllegalArgumentException("Nothing to encrypt");
 		msg.setEncryptions(new Encryption[0]);
 		String result;
 		try {

@@ -16,13 +16,13 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <application
-        android:name="com.example.ecc.ClientApplication"
+        android:name="nz.ac.aut.hss.client.app.ClientApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.example.ecc.Join"
+            android:name="nz.ac.aut.hss.client.app.Join"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,18 +32,18 @@
         </activity>
         
         <activity  
-         android:name="com.example.ecc.SendMessage"  
+         android:name="nz.ac.aut.hss.client.app.SendMessage"
          android:screenOrientation="portrait" />
         
         <activity  
-         android:name=".ReceiveMessage"
+         android:name="nz.ac.aut.hss.client.app.ReceiveMessage"
          android:screenOrientation="portrait" />
         
         <activity  
-         android:name="com.example.ecc.OnetimePasswordInput"  
+         android:name="nz.ac.aut.hss.client.app.OnetimePasswordInput"
          android:screenOrientation="portrait" />
         
-        <receiver android:name=".SMSReceiver">
+        <receiver android:name="nz.ac.aut.hss.client.app.SMSReceiver">
      		<intent-filter android:priority="999">
          		<action android:name="android.provider.Telephony.SMS_RECEIVED" />
      		</intent-filter>

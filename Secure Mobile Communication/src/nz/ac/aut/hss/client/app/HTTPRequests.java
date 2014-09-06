@@ -1,4 +1,4 @@
-package com.example.ecc;
+package nz.ac.aut.hss.client.app;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,9 +14,6 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-
-import android.content.Context;
-import android.widget.Toast;
 
 public class HTTPRequests extends Thread{
 	int i = 0;

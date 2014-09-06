@@ -1,16 +1,11 @@
-package com.example.ecc;
-
-import java.util.TooManyListenersException;
+package nz.ac.aut.hss.client.app;
 
 import android.app.Activity;
-import android.app.PendingIntent;
-import android.content.Intent;
 import android.os.Bundle;
-import android.telephony.gsm.SmsManager;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.Toast;
+import com.example.ecc.R;
 
 public class SendMessage extends Activity{
 	

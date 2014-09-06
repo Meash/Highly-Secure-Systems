@@ -6,7 +6,7 @@ import nz.ac.aut.hss.distribution.crypt.CryptException;
 import nz.ac.aut.hss.distribution.crypt.Encryption;
 import nz.ac.aut.hss.distribution.crypt.RSA;
 import nz.ac.aut.hss.distribution.protocol.ClientCommunicationMessage;
-import nz.ac.aut.hss.distribution.protocol.EncryptedMessage;
+import nz.ac.aut.hss.distribution.protocol.EncryptedClientCommunicationMessage;
 import nz.ac.aut.hss.distribution.protocol.Message;
 import nz.ac.aut.hss.distribution.util.ObjectSerializer;
 
@@ -27,7 +27,7 @@ public class ClientCommunication {
 	private final MessageAuthenticator authenticator;
 	protected final ObjectSerializer serializer;
 	protected final PrivateKey privateKey;
-	private final Encryption[] encryptions;
+	private final Encryption encryption;
 	protected PublicKey partnerPublicKey;
 	private final SMSSender smsSender;
 
@@ -43,7 +43,7 @@ public class ClientCommunication {
 		privateKey = ownPrivateKey;
 
 		partnerPublicKey = serverCommunication.requestClient(partnerPhoneNumber);
-		encryptions = new Encryption[]{new RSA(privateKey, partnerPublicKey)};
+		encryption = new RSA(privateKey, partnerPublicKey);
 		messageEncrypter = new ClientMessageEncrypter(ownPrivateKey);
 
 		try {
@@ -54,15 +54,22 @@ public class ClientCommunication {
 		serializer = new ObjectSerializer();
 	}
 
-	public void sendMessage(final String message, final boolean confidential, final boolean authenticate)
+	public void sendMessage(final String content, final boolean confidential, final boolean authenticate)
 			throws CommunicationException {
-		Encryption[] encryptions = confidential ? this.encryptions : new Encryption[0];
-		Message msg = new ClientCommunicationMessage(message, encryptions);
-		try {
-			msg = messageEncrypter.applyEncryptions(msg);
-		} catch (CryptException e) {
-			throw new CommunicationException("Could not encrypt message", e);
+		Message msg;
+		/* encrypt */
+		if (confidential) {
+			final String encryptedContent;
+			try {
+				encryptedContent = encryption.encrypt(content);
+			} catch (CryptException e) {
+				throw new CommunicationException("Could not encrypt message", e);
+			}
+			msg = new EncryptedClientCommunicationMessage(encryptedContent);
+		} else {
+			msg = new ClientCommunicationMessage(content);
 		}
+		/* authenticate */
 		if (authenticate) {
 			try {
 				msg.authentication = authenticator.hash(msg, privateKey);
@@ -70,14 +77,14 @@ public class ClientCommunication {
 				throw new CommunicationException("Could not create authentication", e);
 			}
 		}
-
-		final String content;
+		/* serialize */
+		final String serial;
 		try {
-			content = serializer.serialize(msg);
+			serial = serializer.serialize(msg);
 		} catch (IOException e) {
 			throw new CommunicationException("Could not serialize message", e);
 		}
-		smsSender.send(partnerPhoneNumber, content);
+		smsSender.send(partnerPhoneNumber, serial);
 	}
 
 	public Message stringToMessage(final String str) throws IOException, ClassNotFoundException {
@@ -90,7 +97,7 @@ public class ClientCommunication {
 	}
 
 	public boolean isMessageConfidential(final Message message) {
-		return message instanceof EncryptedMessage;
+		return message instanceof EncryptedClientCommunicationMessage;
 	}
 
 	public String getPlainMessage(Message msg) throws IOException, CryptException, ClassNotFoundException {
@@ -98,9 +105,7 @@ public class ClientCommunication {
 			verifyClientCommunicationClass(msg);
 			return ((ClientCommunicationMessage) msg).content;
 		}
-		msg = messageEncrypter.decrypt((EncryptedMessage) msg, encryptions);
-		verifyClientCommunicationClass(msg);
-		return ((ClientCommunicationMessage) msg).content;
+		return encryption.decrypt(((EncryptedClientCommunicationMessage) msg).content);
 	}
 
 	private void verifyClientCommunicationClass(final Message msg) throws IllegalArgumentException {

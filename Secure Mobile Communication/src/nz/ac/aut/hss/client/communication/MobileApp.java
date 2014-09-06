@@ -8,4 +8,6 @@ public interface MobileApp {
 	public String getOneTimePassword();
 
 	public String getPhoneNumber();
+
+	public void displayError(final String message);
 }
