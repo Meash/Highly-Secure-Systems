@@ -47,7 +47,7 @@ public class ServerCommunication {
 		this.keyPair = keyStore.loadOrCreateAndSaveKeyPair();
 	}
 
-	public void requestJoin() throws CommunicationException {
+	public void requestJoin() throws CommunicationException, InterruptedException {
 		try {
 			/* step 1/2: initial request */
 			send(new JoinRequestMessage());
@@ -82,7 +82,7 @@ public class ServerCommunication {
 	/**
 	 * @return a map from the client's telephone number to its public key
 	 */
-	public Map<String, PublicKey> requestList() throws CommunicationException {
+	public Map<String, PublicKey> requestList() throws CommunicationException, InterruptedException {
 		try {
 			send(new ClientListRequestMessage());
 			Object msgObj = readObject();
@@ -100,7 +100,7 @@ public class ServerCommunication {
 	 * @throws ClientDoesNotExistException if the client does not exist
 	 */
 	public PublicKey requestClient(final String telephoneNumber)
-			throws CommunicationException, ClientDoesNotExistException {
+			throws CommunicationException, ClientDoesNotExistException, InterruptedException {
 		try {
 			send(new ClientRequestMessage(telephoneNumber));
 			Object msgObj = readObject();
@@ -125,8 +125,21 @@ public class ServerCommunication {
 		}
 	}
 
-	private void send(Message msg) throws IOException {
-		out.println(serializer.serialize(msg));
+	private void send(final Message msg) throws IOException, InterruptedException {
+		final SavedException<IOException> saved = new SavedException<>();
+		Thread thread = new Thread() {
+			@Override
+			public void run() {
+				try {
+					out.println(serializer.serialize(msg));
+				} catch (IOException e) {
+					saved.save(e);
+				}
+			}
+		};
+		thread.start();
+		thread.join();
+		saved.throwIfSaved();
 	}
 
 	private Object readObject() throws IOException, ClassNotFoundException {

@@ -26,7 +26,7 @@ public class ClientCommunications {
 	}
 
 	public ClientCommunication getOrCreate(final String phone)
-			throws CommunicationException, ClientDoesNotExistException {
+			throws CommunicationException, ClientDoesNotExistException, InterruptedException {
 		ClientCommunication communication = communications.get(phone);
 		if(communication == null) {
 			communication = new ClientCommunication(phone, serverComm, smsSender, privateKey);

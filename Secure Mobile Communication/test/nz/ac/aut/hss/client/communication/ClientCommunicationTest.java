@@ -56,7 +56,7 @@ public class ClientCommunicationTest {
 	}
 
 	@Before
-	public void setUp() throws CommunicationException, ClientDoesNotExistException {
+	public void setUp() throws Exception {
 		new NonStrictExpectations() {{
 			serverComm.requestClient(partnerPhone);
 			result = partnerPublicKey;

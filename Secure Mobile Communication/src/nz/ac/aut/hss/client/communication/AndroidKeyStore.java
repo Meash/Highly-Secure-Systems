@@ -17,6 +17,7 @@ public class AndroidKeyStore implements KeyStore {
 	private static final String KEY_FILE = "keypair.obj";
 	private final ObjectSerializer serializer;
 	private final Context context;
+	private KeyPair keyPair;
 
 	public AndroidKeyStore(final Context context) {
 		this.context = context;
@@ -25,15 +26,22 @@ public class AndroidKeyStore implements KeyStore {
 
 	public KeyPair loadOrCreateAndSaveKeyPair()
 			throws KeyStoreException {
+		// memory
+		if(keyPair != null)
+			return keyPair;
+		// file
 		if (new File(KEY_FILE).exists()) {
 			try {
-				return loadKeyPair();
+				keyPair = loadKeyPair();
+				return keyPair;
 			} catch (ClassNotFoundException | IOException e) {
 				throw new KeyStoreException("Could not load key pair", e);
 			}
-		} else {
+		}
+		// create
+		else {
 			try {
-				final KeyPair keyPair = RSA.createKeyPair();
+				keyPair = RSA.createKeyPair();
 				saveKeyPair(keyPair);
 				return keyPair;
 			} catch (NoSuchAlgorithmException e) {

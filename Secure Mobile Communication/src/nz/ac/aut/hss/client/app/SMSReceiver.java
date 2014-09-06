@@ -6,15 +6,24 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.util.Log;
-import nz.ac.aut.hss.client.communication.*;
+import nz.ac.aut.hss.client.communication.ClientCommunication;
+import nz.ac.aut.hss.client.communication.ClientCommunications;
+import nz.ac.aut.hss.client.communication.ClientDoesNotExistException;
+import nz.ac.aut.hss.client.communication.CommunicationException;
+import nz.ac.aut.hss.distribution.protocol.Message;
+import nz.ac.aut.hss.distribution.util.ObjectSerializer;
+
+import java.io.IOException;
 
 public class SMSReceiver extends BroadcastReceiver {
 	private final ClientCommunications communications;
-	private final MobileApp app;
+	private final ClientApplication app;
+	private final ObjectSerializer serializer;
 
-	public SMSReceiver(final ClientCommunications communications, final MobileApp app) {
-		this.communications = communications;
-		this.app = app;
+	public SMSReceiver() {
+		app = ClientApplication.getInstance();
+		this.communications = app.getCommunications();
+		serializer = new ObjectSerializer();
 	}
 
 	@Override
@@ -56,12 +65,28 @@ public class SMSReceiver extends BroadcastReceiver {
 						return;
 					}
 
-					// TODO use communication in activity
+					String plain;
+					boolean confidential, authenticated;
+					try {
+						final Object msgObj = serializer.deserialize(message);
+						if(! (msgObj instanceof Message)) {
+							app.displayError("Expected class Message, got " + msgObj.getClass().getName());
+						}
+						Message msg = (Message) msgObj;
+						plain = communication.getPlainMessage(msg);
+						confidential = communication.isMessageConfidential(msg);
+						authenticated = communication.isMessageAuthentic(msg);
+					} catch (IOException | ClassNotFoundException e) {
+						plain = message;
+						confidential = authenticated = false;
+					}
 
 					Intent receiveMessage = new Intent(context.getApplicationContext(), ReceiveMessage.class);
 					receiveMessage.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 					receiveMessage.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					receiveMessage.putExtra("MESSAGEBODY", message);
+					receiveMessage.putExtra(ReceiveMessage.BODY, plain);
+					receiveMessage.putExtra(ReceiveMessage.CONFIDENTIAL, confidential);
+					receiveMessage.putExtra(ReceiveMessage.AUTHENTICATED, authenticated);
 					context.startActivity(receiveMessage);
 
 				} // end for loop

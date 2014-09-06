@@ -71,13 +71,13 @@ public class ServerCommunicationTest {
 	}
 
 	@Test
-	public void clientList() throws CommunicationException {
+	public void clientList() throws Exception {
 		Map map = communication.requestList();
 		assertTrue(map.isEmpty());
 	}
 
 	@Test
-	public void nonExistentClient() throws CommunicationException, ClientDoesNotExistException {
+	public void nonExistentClient() throws Exception {
 		exception.expect(ClientDoesNotExistException.class);
 		communication.requestClient("this isn't even a phone number");
 	}

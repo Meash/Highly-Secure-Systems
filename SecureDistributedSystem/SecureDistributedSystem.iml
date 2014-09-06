@@ -37,6 +37,25 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/lib/jetty-distribution-9.2.2.v20140723" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/lib/jetty-distribution-9.2.2.v20140723" recursive="false" />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty (2)">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty-all-9.2.2.v20140723.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
 

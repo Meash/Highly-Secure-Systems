@@ -1,9 +1,5 @@
 package nz.ac.aut.hss.client.app;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -15,18 +11,22 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
+
 public class HTTPRequests extends Thread{
 	int i = 0;
 	private String URL;
 	private String response;
 	private MainActivity context;
-	private boolean requestFinished = false; 
-	
+	private boolean requestFinished = false;
+
 	public HTTPRequests(String URL, MainActivity context) {
 		this.URL = URL;
 		this.context = context;
 	}
-	
+
 	public String getRequest(){
 		String responseString = "";
 		try {
@@ -36,8 +36,8 @@ public class HTTPRequests extends Thread{
 			if(status.getStatusCode() == HttpStatus.SC_OK){
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				response.getEntity().writeTo(out);
-		        out.close();
-		        responseString = out.toString();
+				out.close();
+				responseString = out.toString();
 			} else {
 				response.getEntity().getContent().close();
 				return "Status Error";
@@ -51,7 +51,7 @@ public class HTTPRequests extends Thread{
 		}
 		return responseString;
 	}
-	
+
 	public String postRequest(List<NameValuePair> values){
 		String responseString = "";
 		try {
@@ -63,8 +63,8 @@ public class HTTPRequests extends Thread{
 			if(status.getStatusCode() == HttpStatus.SC_OK){
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				response.getEntity().writeTo(out);
-		        out.close();
-		        responseString = out.toString();
+				out.close();
+				responseString = out.toString();
 			} else {
 				response.getEntity().getContent().close();
 				return "Status Error";
@@ -81,14 +81,14 @@ public class HTTPRequests extends Thread{
 
 	public void run() {
 		requestFinished = false;
-    	response = getRequest();
-    	requestFinished = true;
-    }
-	
+		response = getRequest();
+		requestFinished = true;
+	}
+
 	public String getResponse(){
 		return response;
 	}
-	
+
 	public boolean isFinished(){
 		return requestFinished;
 	}

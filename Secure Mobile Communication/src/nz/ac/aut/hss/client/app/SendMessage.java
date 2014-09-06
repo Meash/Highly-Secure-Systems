@@ -3,33 +3,45 @@ package nz.ac.aut.hss.client.app;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import com.example.ecc.R;
+import android.widget.Spinner;
 import nz.ac.aut.hss.client.communication.ClientCommunication;
 import nz.ac.aut.hss.client.communication.ClientCommunications;
-import nz.ac.aut.hss.client.communication.SMSSender;
-import nz.ac.aut.hss.client.communication.ServerCommunication;
+import nz.ac.aut.hss.client.communication.CommunicationException;
 
-import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Map;
 
 public class SendMessage extends Activity {
-	private final ClientCommunications communications;
-	private final String phone;
+	private ClientCommunications communications;
+	private String phone;
 	private ClientApplication clientApplication;
-
-	public SendMessage(final String phoneNumber, ServerCommunication serverCommunication, SMSSender smsSender,
-					   PrivateKey privateKey) {
-		this.phone = phoneNumber;
-		communications = new ClientCommunications(serverCommunication, smsSender, privateKey);
-	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.send_message);
-		clientApplication.getInstance();
-//		clientApplication = ClientApplication.getInstance();
+		clientApplication = ClientApplication.getInstance();
+
+		this.phone = clientApplication.getPhoneNumber();
+		this.communications = clientApplication.getCommunications();
+
+		final Map<String, PublicKey> userMap;
+		try {
+			userMap = clientApplication.serverComm.requestList();
+		} catch (CommunicationException | InterruptedException e) {
+			clientApplication
+					.displayError(e.getClass().getSimpleName() + " while requesting client list: " + e.getMessage());
+			return;
+		}
+
+		Spinner spinner = (Spinner) findViewById(R.id.phoneList);
+		ArrayAdapter<String> adapter =
+				new ArrayAdapter<>(this, R.layout.send_message, (String[]) userMap.keySet().toArray());
+		spinner.setAdapter(adapter);
+
 	}
 
 	public void onSend(View view) {

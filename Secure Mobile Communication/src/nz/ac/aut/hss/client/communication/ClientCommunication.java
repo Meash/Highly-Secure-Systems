@@ -31,7 +31,7 @@ public class ClientCommunication {
 
 	public ClientCommunication(final String partnerPhoneNumber, final ServerCommunication serverCommunication,
 							   final SMSSender smsSender, final PrivateKey ownPrivateKey)
-			throws CommunicationException, ClientDoesNotExistException {
+			throws CommunicationException, ClientDoesNotExistException, InterruptedException {
 		if (partnerPhoneNumber == null || partnerPhoneNumber.length() == 0)
 			throw new IllegalArgumentException("partnerPhoneNumber is null or empty");
 		this.partnerPhoneNumber = partnerPhoneNumber;
