@@ -48,14 +48,7 @@ public class SMSReceiver extends BroadcastReceiver {
 					ClientApplication.getInstance()
 							.displayError("Received message from " + phoneNumber + ": " + message, null);
 					Log.i("SmsReceiver", "senderNum: " + phoneNumber + "; message: " + message);
-
-					// Show Alert
-					/*
-					int duration = Toast.LENGTH_LONG;
-					Toast toast = Toast.makeText(context, "senderNum: "
-							+ senderNum + ", message: " + message, duration);
-					toast.show();*/
-
+					
 					final ClientCommunication communication;
 					try {
 						communication = communications.getOrCreate(phoneNumber);
@@ -75,7 +68,7 @@ public class SMSReceiver extends BroadcastReceiver {
 						plain = communication.getPlainMessage(msg);
 						confidential = communication.isMessageConfidential(msg);
 						authenticated = communication.isMessageAuthentic(msg);
-					} catch (IOException | ClassNotFoundException e) {
+					} catch (Exception e) {
 						plain = message;
 						confidential = authenticated = false;
 					}

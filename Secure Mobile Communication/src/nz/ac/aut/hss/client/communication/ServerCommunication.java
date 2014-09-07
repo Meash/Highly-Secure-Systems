@@ -38,7 +38,7 @@ public class ServerCommunication {
 		this.app = app;
 		this.phoneNumber = app.getPhoneNumber();
 
-		final SavedException<IOException> savedException = new SavedException<>();
+		final SavedException<IOException> savedException = new SavedException<IOException>();
 		Thread thread = new Thread() {
 			@Override
 			public void run() {
@@ -101,7 +101,7 @@ public class ServerCommunication {
 			final String decryptedNonce = asymmetricEncryption.decrypt(msg.encryptedNonce);
 			if (!decryptedNonce.equals(nonce))
 				throw new CommunicationException("Invalid nonce reply");
-		} catch (CryptException | IOException | ClassNotFoundException | NoSuchPaddingException | NoSuchAlgorithmException e) {
+		} catch (Exception e) {
 			throw new CommunicationException(e);
 		}
 	}
@@ -116,7 +116,7 @@ public class ServerCommunication {
 			if (!(msgObj instanceof ClientListMessage))
 				throw new CommunicationException("Expected client list message, got " + msgObj.getClass().getName());
 			return ((ClientListMessage) msgObj).phonePublicKey;
-		} catch (ClassNotFoundException | IOException e) {
+		} catch (Exception e) {
 			throw new CommunicationException("Could not retrieve list", e);
 		}
 	}
@@ -138,7 +138,7 @@ public class ServerCommunication {
 						"Expected client public key or client does not exist message, got " +
 								msgObj.getClass().getName());
 			return ((ClientPublicKeyMessage) msgObj).publicKey;
-		} catch (ClassNotFoundException | IOException e) {
+		} catch (Exception e) {
 			throw new CommunicationException("Could not retrieve list", e);
 		}
 	}
@@ -153,7 +153,7 @@ public class ServerCommunication {
 	}
 
 	private void send(final Message msg) throws IOException, InterruptedException {
-		final SavedException<IOException> saved = new SavedException<>();
+		final SavedException<IOException> saved = new SavedException<IOException>();
 		Thread thread = new Thread() {
 			@Override
 			public void run() {
@@ -170,7 +170,7 @@ public class ServerCommunication {
 	}
 
 	private Object readObject() throws IOException, ClassNotFoundException, InterruptedException {
-		final SavedException<IOException> savedException = new SavedException<>();
+		final SavedException<IOException> savedException = new SavedException<IOException>();
 		final String[] line = new String[1];
 		Thread thread = new Thread() {
 			@Override

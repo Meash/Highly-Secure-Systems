@@ -22,7 +22,7 @@ public class ClientCommunications {
 		this.smsSender = smsSender;
 		if(privateKey == null) throw new IllegalArgumentException("privateKey is null");
 		this.privateKey = privateKey;
-		communications = new HashMap<>();
+		communications = new HashMap<String, ClientCommunication>();
 	}
 
 	public ClientCommunication getOrCreate(final String phone)

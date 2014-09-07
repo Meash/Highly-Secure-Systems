@@ -45,9 +45,9 @@ public class ClientApplication extends Application implements MobileApp {
 			serverComm = new ServerCommunication(server, port, this, keyPair);
 			Toast.makeText(getApplicationContext(), "server connected", Toast.LENGTH_LONG).show();
 
-			final SMSSender smsSender = new SmsSender(this);
+			final SMSSender smsSender = new SmsSender();
 			this.communications = new ClientCommunications(serverComm, smsSender, privateKey);
-		} catch (KeyStoreException | IOException | InterruptedException e) {
+		} catch (Exception e) {
 			displayError(e.getClass().getSimpleName() + " while initializing server communication: " + e.getMessage(),
 					e);
 //			throw new RuntimeException(e);

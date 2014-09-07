@@ -31,11 +31,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
         <activity  
          android:name="nz.ac.aut.hss.client.app.SendMessage"
          android:screenOrientation="portrait" />
-        
         <activity  
          android:name="nz.ac.aut.hss.client.app.ReceiveMessage"
          android:screenOrientation="portrait" />

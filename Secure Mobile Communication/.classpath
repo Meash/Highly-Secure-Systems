@@ -5,7 +5,9 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
+	<classpathentry exported="true" kind="lib" path="/HssServer/lib/commons-lang3-3.3.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jetty-all-9.2.2.v20140723.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/HssServer"/>
-	<classpathentry kind="lib" path="/HssServer/lib/commons-lang3-3.3.2.jar"/>
+	<classpathentry kind="lib" path="libs/istack-commons-tools-2.2.MR1.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

@@ -61,7 +61,7 @@ public class Join extends Activity {
 
 			Intent intent = new Intent(this, OnetimePasswordInput.class);
 			startActivity(intent);
-		} catch (CommunicationException | InterruptedException e) {
+		} catch (Exception e) {
 			instance.displayError("Could not join server", e);
 		}
 	}

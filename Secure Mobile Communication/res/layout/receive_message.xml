@@ -27,5 +27,14 @@
         android:layout_height="wrap_content"
         android:text="@string/confidential"/>
     
+    <Button
+	    	android:layout_marginTop="10dp"
+	        android:textColor="#FFF"
+	        android:layout_width="170dp"
+	        android:layout_height="45dp"
+	        android:text="Back" 
+	        android:onClick="onClick"
+     />
+    
 
 </LinearLayout>

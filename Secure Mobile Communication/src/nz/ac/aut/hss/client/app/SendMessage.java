@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 import nz.ac.aut.hss.client.communication.ClientCommunication;
 import nz.ac.aut.hss.client.communication.ClientCommunications;
 import nz.ac.aut.hss.client.communication.CommunicationException;
@@ -32,7 +33,7 @@ public class SendMessage extends Activity {
 
 		try {
 			updateClientList();
-		} catch (CommunicationException | InterruptedException e) {
+		} catch (Exception e) {
 			clientApplication.displayError(
 					e.getClass().getSimpleName() + " while requesting client list: " + e.getMessage(), e);
 			return;
@@ -50,7 +51,7 @@ public class SendMessage extends Activity {
 		Spinner spinner = (Spinner) findViewById(R.id.phoneList);
 		final Set<String> keySet = userMap.keySet();
 		ArrayAdapter<String> adapter =
-				new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+				new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,
 						keySet.toArray(new String[keySet.size()]));
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
@@ -67,10 +68,15 @@ public class SendMessage extends Activity {
 
 		try {
 			ClientCommunication communication = communications.getOrCreate(partnerPhone);
-			communication.sendMessage(messageBody, confCheck.isChecked(), authCheck.isChecked());
+		    String serial = communication.sendMessage(messageBody, confCheck.isChecked(), authCheck.isChecked());
+			Toast.makeText(this, serial, 1).show();
+			SmsSender sms = new SmsSender();
+			//sms.send(partnerPhone, serial);
+			
 		} catch (Throwable t) {
 			clientApplication.displayError(t.getClass().getSimpleName() + " sending message: " + t.getMessage(), t);
 		}
+
 	}
 
 

@@ -36,7 +36,7 @@ public class AndroidKeyStore implements KeyStore {
 			try {
 				keyPair = loadKeyPair();
 				return keyPair;
-			} catch (ClassNotFoundException | IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+			} catch (Exception e) {
 				throw new KeyStoreException("Could not load key pair", e);
 			}
 		}

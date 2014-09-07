@@ -1,5 +1,6 @@
 package nz.ac.aut.hss.client.communication;
 
+import nz.ac.aut.hss.client.app.SmsSender;
 import nz.ac.aut.hss.distribution.auth.MessageAuthenticator;
 import nz.ac.aut.hss.distribution.crypt.CryptException;
 import nz.ac.aut.hss.distribution.crypt.Encryption;
@@ -27,7 +28,7 @@ public class ClientCommunication {
 	protected final PrivateKey privateKey;
 	private final Encryption messageEncryption;
 	protected PublicKey partnerPublicKey;
-	private final SMSSender smsSender;
+	private SMSSender smsSender;
 
 	public ClientCommunication(final String partnerPhoneNumber, final ServerCommunication serverCommunication,
 							   final SMSSender smsSender, final PrivateKey ownPrivateKey)
@@ -51,7 +52,7 @@ public class ClientCommunication {
 		serializer = new ObjectSerializer();
 	}
 
-	public void sendMessage(final String content, final boolean confidential, final boolean authenticate)
+	public String sendMessage(final String content, final boolean confidential, final boolean authenticate)
 			throws CommunicationException {
 		Message msg;
 		/* encrypt */
@@ -69,18 +70,18 @@ public class ClientCommunication {
 		if (authenticate) {
 			try {
 				msg.authentication = authenticator.hash(msg, privateKey);
-			} catch (CryptException | IOException e) {
+			} catch (Exception e) {
 				throw new CommunicationException("Could not create authentication", e);
 			}
 		}
 		/* serialize */
-		final String serial;
+		String serial;
 		try {
 			serial = serializer.serialize(msg);
 		} catch (IOException e) {
 			throw new CommunicationException("Could not serialize message", e);
 		}
-		smsSender.send(partnerPhoneNumber, serial);
+		return serial;
 	}
 
 	public Message stringToMessage(final String str) throws IOException, ClassNotFoundException {
